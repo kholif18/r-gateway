@@ -13,33 +13,36 @@
             <i class="fas fa-paper-plane"></i>
             <span>Send Message</span>
         </a>   
-        <a href="{{ url('/history') }}" class="menu-item  {{ Request::is('history') ? 'active' : '' }}">
-            <i class="fas fa-history"></i>
-            <span>History</span>
-        </a>
-        
-        <div class="divider"></div>
         
         <a href="{{ url('/wa-login') }}" class="menu-item  {{ Request::is('wa-login') ? 'active' : '' }}">
             <i class="fas fa-qrcode"></i>
             <span>Login WhatsApp</span>
         </a>
 
+        <div class="divider"></div>
+        
+
         <a href="{{ url('/user') }}" class="menu-item  {{ Request::is('user') ? 'active' : '' }}">
             <i class="fas fa-user"></i>
             <span>My Profile</span>
         </a>
+
+        <a href="{{ url('/history') }}" class="menu-item  {{ Request::is('history') ? 'active' : '' }}">
+            <i class="fas fa-history"></i>
+            <span>History</span>
+        </a>
+
+        <a href="{{ url('/report') }}" class="menu-item  {{ Request::is('report') ? 'active' : '' }}">
+            <i class="fas fa-chart-line"></i>
+            <span>Report</span>
+        </a>
+        
+        <div class="divider"></div>
 
         <a href="{{ url('/settings') }}" class="menu-item  {{ Request::is('settings') ? 'active' : '' }}">
             <i class="fas fa-cog"></i>
             <span>Settings</span>
         </a>
 
-        <div class="divider"></div>
-        
-        <div class="menu-item" id="logout">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>Logout</span>
-        </div>
     </div>
 </div>

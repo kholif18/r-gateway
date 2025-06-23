@@ -6,6 +6,7 @@ use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WhatsappLoginController;
 
 Route::get('/', [DashboardController::class, 'index']);
@@ -13,8 +14,11 @@ Route::get('/', [DashboardController::class, 'index']);
 Route::get('/send-message', [MessageController::class, 'index']);
 Route::post('/send', [MessageController::class, 'send']);
 
-Route::get('/history', [HistoryController::class, 'index']);
 Route::get('/user', [HistoryController::class, 'user']);
+
+Route::get('/history', [HistoryController::class, 'index']);
+
+Route::get('/report', [ReportController::class, 'index']);
 
 Route::get('/wa-login', [WhatsappLoginController::class, 'index']);
 Route::get('/whatsapp/qr', [WhatsappLoginController::class, 'qr']);
