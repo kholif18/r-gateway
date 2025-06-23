@@ -1,0 +1,13 @@
+{
+  "api_token": "token-anda",
+  "api_access": true,
+  "default_sender": "+6281122334455",
+  "sender_name": "Customer Support",
+  "use_sender_name": true,
+  "timeout": 30,
+  "max_retry": 3,
+  "retry_interval": 10,
+  "max_queue": 100,
+  "log_level": "info",
+  "debug_mode": false
+}
