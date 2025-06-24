@@ -2,32 +2,42 @@
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WhatsappLoginController;
 
-Route::get('/', [DashboardController::class, 'index']);
+Route::middleware('auth')->group(function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-Route::get('/send-message', [MessageController::class, 'index']);
-Route::post('/send', [MessageController::class, 'send']);
+    Route::get('/send-message', [MessageController::class, 'index'])->name('message');
+    Route::post('/send', [MessageController::class, 'send']);
 
-Route::get('/user', [HistoryController::class, 'user']);
+    Route::get('/user', [HistoryController::class, 'user'])->name('user');
+    Route::get('/history', [HistoryController::class, 'index'])->name('history');
+    Route::get('/history/export', [HistoryController::class, 'export'])->name('history.export');
 
-Route::get('/history', [HistoryController::class, 'index']);
+    Route::get('/report', [ReportController::class, 'index'])->name('report');
 
-Route::get('/report', [ReportController::class, 'index']);
+    Route::get('/wa-login', [WhatsappLoginController::class, 'index'])->name('loginwhatsapp');
+    Route::get('/whatsapp/qr', [WhatsappLoginController::class, 'qr']);
+    Route::get('/whatsapp/status', [WhatsappLoginController::class, 'status']);
+    Route::post('/whatsapp/logout', function () {
+        Http::get(env('WA_GATEWAY_API') . '/instance/default/logout');
+        return back()->with('status', 'Berhasil logout dari WhatsApp.');
+    });
 
-Route::get('/wa-login', [WhatsappLoginController::class, 'index']);
-Route::get('/whatsapp/qr', [WhatsappLoginController::class, 'qr']);
-Route::get('/whatsapp/status', [WhatsappLoginController::class, 'status']);
-Route::post('/whatsapp/logout', function () {
-    Http::get(env('WA_GATEWAY_API') . '/instance/default/logout');
-    return back()->with('status', 'Berhasil logout dari WhatsApp.');
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+    Route::post('/settings/save', [SettingsController::class, 'save']);
+    Route::post('/settings/reset', [SettingsController::class, 'reset'])->name('settings.reset');
+
+    Route::get('/profile', [UserController::class, 'edit'])->middleware(['auth'])->name('profile.edit');
+    Route::put('/profile', [UserController::class, 'update'])->name('profile.update');
 });
 
-Route::get('/settings', [SettingsController::class, 'index']);
-Route::post('/settings/save', [SettingsController::class, 'save']);
-Route::post('/settings/reset', [SettingsController::class, 'reset']);
+
+require __DIR__.'/auth.php';

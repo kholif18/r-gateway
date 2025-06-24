@@ -23,15 +23,15 @@
                         <div class="form-group">
                             <label for="number">Nomor WhatsApp</label>
                             <div class="search-box">
-                                <i class="fas fa-search"></i>
+                                <i class="fas fa-phone"></i>
                                 <input type="text" id="number" name="number" class="form-control" placeholder="6281234567890" required>
                             </div>
                         </div>
                         <div class="form-group text-muted">
-                            <label for="number">Secret</label>
+                            <label for="key">Secret</label>
                             <div class="search-box">
                                 <i class="fas fa-key"></i>
-                                <input type="text" id="number" name="number" class="form-control" value="sadkjhlaksdhlsakg" readonly>
+                                <input type="text" id="key" name="key" class="form-control" value="sadkjhlaksdhlsakg" readonly>
                             </div>
                         </div>
                         

@@ -6,11 +6,6 @@
     <div class="card">
         <div class="card-header">
             <div class="card-title">Message Report</div>
-            <div>
-                <button class="btn">
-                    <i class="fas fa-download"></i> Export Data
-                </button>
-            </div>
         </div>
         <div class="card-body">            
             <div class="chart-container mb-4">
@@ -25,55 +20,46 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>23 Jun 2025, 14:30</td>
-                            <td>8</td>
-                        </tr>
-                        <tr>
-                            <td>23 Jun 2025, 12:15</td>
-                            <td>5</td>
-                        </tr>
-                        <tr>
-                            <td>22 Jun 2025, 16:45</td>
-                            <td>4</td>
-                        </tr>
-                        <tr>
-                            <td>22 Jun 2025, 09:20</td>
-                            <td>9</td>
-                        </tr>
-                        <tr>
-                            <td>21 Jun 2025, 17:30</td>
-                            <td>2</td>
-                        </tr>
-                        <tr>
-                            <td>20 Jun 2025, 11:05</td>
-                            <td>3</td>
-                        </tr>
-                        <tr>
-                            <td>19 Jun 2025, 15:40</td>
-                            <td>4</td>
-                        </tr>
-                        <tr>
-                            <td>18 Jun 2025, 10:15</td>
-                            <td>8</td>
-                        </tr>
+                        @foreach ($reports as $report)
+                            <tr>
+                                <td>{{ $report->date }}</td>
+                                <td>{{ $report->total }}</td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
             
             <div class="pagination">
-                <button class="page-btn">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="page-btn active">1</button>
-                <button class="page-btn">2</button>
-                <button class="page-btn">3</button>
-                <button class="page-btn">4</button>
-                <span class="page-info">Page 1 of 4</span>
-                <button class="page-btn">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
+                {{-- Previous --}}
+                @if ($reports->onFirstPage())
+                    <button class="page-btn" disabled><i class="fas fa-chevron-left"></i></button>
+                @else
+                    <a href="{{ $reports->previousPageUrl() }}" class="page-btn"><i class="fas fa-chevron-left"></i></a>
+                @endif
+
+                {{-- Page numbers --}}
+                @foreach ($reports->getUrlRange(1, $reports->lastPage()) as $page => $url)
+                    @if ($page == $reports->currentPage())
+                        <span class="page-btn active">{{ $page }}</span>
+                    @else
+                        <a href="{{ $url }}" class="page-btn">{{ $page }}</a>
+                    @endif
+                @endforeach
+
+                {{-- Next --}}
+                @if ($reports->hasMorePages())
+                    <a href="{{ $reports->nextPageUrl() }}" class="page-btn"><i class="fas fa-chevron-right"></i></a>
+                @else
+                    <button class="page-btn" disabled><i class="fas fa-chevron-right"></i></button>
+                @endif
+
+                {{-- Info --}}
+                <span class="page-info">
+                    Page {{ $reports->currentPage() }} of {{ $reports->lastPage() }}
+                </span>
             </div>
+
         </div>
     </div>
 
@@ -85,10 +71,10 @@
             new Chart(ctx, {
                 type: "line",
                 data: {
-                    labels: ["Jan", "Feb", "Mar", "Apr", "Mei"],
+                    labels: {!! json_encode($chartLabels) !!},
                     datasets: [{
-                        label: "Contoh Data",
-                        data: [10, 20, 15, 11, 14],
+                        label: "WA Message",
+                        data: {!! json_encode($chartData) !!},
                         borderColor: "#4a6bdf",
                         tension: 0.4
                     }]

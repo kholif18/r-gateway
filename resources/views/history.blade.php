@@ -3,130 +3,126 @@
 @section('title', 'History')
 
 @section('content')
+    @php use Illuminate\Support\Str; @endphp
     <!-- History Page -->
     <div class="card">
         <div class="card-header">
             <div class="card-title">Message History</div>
             <div>
-                <button class="btn">
+                <a href="{{ route('history.export', request()->query()) }}" class="btn">
                     <i class="fas fa-download"></i> Export Data
-                </button>
+                </a>
             </div>
         </div>
         <div class="card-body">
-            <div class="row mb-3 mt-3">
-                <div class="col-2">
-                    <label for="date-from">From Date</label>
-                    <input type="date" id="date-from" class="filter-control" value="2025-06-01">
+            <form method="GET" action="{{ url('/history') }}">
+                <div class="row mb-3 mt-3">
+                    <div class="col-2">
+                        <label>From Date</label>
+                        <input type="date" name="from" class="filter-control" value="{{ request('from') }}">
+                    </div>
+                    <div class="col-2">
+                        <label>To Date</label>
+                        <input type="date" name="to" class="filter-control" value="{{ request('to') }}">
+                    </div>
+                    <div class="col-2">
+                        <label>Status</label>
+                        <select name="status" class="filter-control">
+                            <option value="all">All Status</option>
+                            @foreach(['delivered', 'read', 'pending', 'failed'] as $status)
+                                <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>
+                                    {{ ucfirst($status) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-3">
+                        <label>Search</label>
+                        <input type="text" name="search" class="filter-control" placeholder="Search..." value="{{ request('search') }}">
+                    </div>
+                    <div class="col-3 mt-4">
+                        <button class="btn"><i class="fas fa-filter"></i> Apply</button>
+                        <a href="{{ url('/history') }}" class="btn btn-outline"><i class="fas fa-redo"></i> Reset</a>
+                    </div>
                 </div>
-                
-                <div class="col-2">
-                    <label for="date-to">To Date</label>
-                    <input type="date" id="date-to" class="filter-control" value="2025-06-23">
-                </div>
-                
-                <div class="col-2">
-                    <label for="status-filter">Status</label>
-                    <select id="status-filter" class="filter-control">
-                        <option value="all">All Status</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="read">Read</option>
-                        <option value="pending">Pending</option>
-                        <option value="failed">Failed</option>
-                    </select>
-                </div>
-                
-                <div class="col-3">
-                    <label for="search">Search</label>
-                    <input type="text" id="search" class="filter-control" placeholder="Search recipient or message...">
-                </div>
-                
-                <div class="col-3 mt-4">
-                    <button class="btn">
-                        <i class="fas fa-filter"></i> Apply Filters
-                    </button>
-                    <button class="btn btn-outline">
-                        <i class="fas fa-redo"></i> Reset
-                    </button>
-                </div>
-            </div>
+            </form>
             
             <div class="table-container">
                 <table class="history-table">
                     <thead>
                         <tr>
-                            <th>Date & Time</th>
-                            <th>Recipient</th>
+                            <th style="width: 200px">Date & Time</th>
+                            <th>to</th>
                             <th>Message</th>
-                            <th>Status</th>
+                            <th style="width: 150px">Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>23 Jun 2025, 14:30</td>
-                            <td>John Doe (+628123456789)</td>
-                            <td class="message-preview">Halo John, terima kasih sudah menghubungi kami. Berikut detail pesanan Anda...</td>
-                            <td><span class="status-badge status-read">Read</span></td>
-                        </tr>
-                        <tr>
-                            <td>23 Jun 2025, 12:15</td>
-                            <td>Jane Smith (+628987654321)</td>
-                            <td class="message-preview">Promo spesial bulan ini! Diskon 30% untuk semua produk...</td>
-                            <td><span class="status-badge status-delivered">Delivered</span></td>
-                        </tr>
-                        <tr>
-                            <td>22 Jun 2025, 16:45</td>
-                            <td>Marketing Team (Group)</td>
-                            <td class="message-preview">Meeting besok pukul 10:00 WIB di kantor. Mohon konfirmasi kehadiran...</td>
-                            <td><span class="status-badge status-read">Read</span></td>
-                        </tr>
-                        <tr>
-                            <td>22 Jun 2025, 09:20</td>
-                            <td>Robert Johnson (+628112233445)</td>
-                            <td class="message-preview">Invoice pembayaran Anda terlampir. Mohon segera melakukan pembayaran...</td>
-                            <td><span class="status-badge status-pending">Pending</span></td>
-                        </tr>
-                        <tr>
-                            <td>21 Jun 2025, 17:30</td>
-                            <td>Sarah Williams (+628556677889)</td>
-                            <td class="message-preview">Terima kasih telah melakukan pembelian! Berikut adalah kode tracking pengiriman...</td>
-                            <td><span class="status-badge status-failed">Failed</span></td>
-                        </tr>
-                        <tr>
-                            <td>20 Jun 2025, 11:05</td>
-                            <td>Michael Brown (+628990011223)</td>
-                            <td class="message-preview">Pengingat: Janji temu Anda besok pukul 14:00 dengan Dr. Andi...</td>
-                            <td><span class="status-badge status-delivered">Delivered</span></td>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>19 Jun 2025, 15:40</td>
-                            <td>Emily Davis (+628334455667)</td>
-                            <td class="message-preview">Selamat ulang tahun! Kami memberikan voucher diskon 20% sebagai hadiah...</td>
-                            <td><span class="status-badge status-read">Read</span></td>
-                        </tr>
-                        <tr>
-                            <td>18 Jun 2025, 10:15</td>
-                            <td>Customer Support (Group)</td>
-                            <td class="message-preview">Update terbaru mengenai maintenance sistem pada hari Sabtu...</td>
-                            <td><span class="status-badge status-delivered">Delivered</span></td>
-                        </tr>
+                        @forelse($histories as $history)
+                            <tr>
+                                <td>{{ \Carbon\Carbon::parse($history->sent_at)->format('d M Y, H:i') }}</td>
+                                <td>{{ $history->phone }}</td>
+                                <td class="message-preview" title="{{ $history->message }}">
+                                    {{ Str::limit($history->message, 60, '...') }}
+                                </td>
+                                <td>
+                                    <span class="status-badge status-{{ $history->status }}">{{ ucfirst($history->status) }}</span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="4" class="text-center">No messages found.</td></tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
             
-            <div class="pagination">
-                <button class="page-btn">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="page-btn active">1</button>
-                <button class="page-btn">2</button>
-                <button class="page-btn">3</button>
-                <button class="page-btn">4</button>
-                <span class="page-info">Page 1 of 4</span>
-                <button class="page-btn">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <form method="GET" class="d-flex align-items-center" style="gap: 0.5rem;">
+                    <label>Show</label>
+                    <select name="per_page" onchange="this.form.submit()" class="filter-control">
+                        @foreach([10, 25, 50] as $size)
+                            <option value="{{ $size }}" {{ request('per_page', 10) == $size ? 'selected' : '' }}>{{ $size }}</option>
+                        @endforeach
+                    </select>
+                    <span>entries</span>
+
+                    {{-- Kirim filter yang sudah diisi --}}
+                    <input type="hidden" name="from" value="{{ request('from') }}">
+                    <input type="hidden" name="to" value="{{ request('to') }}">
+                    <input type="hidden" name="status" value="{{ request('status') }}">
+                    <input type="hidden" name="search" value="{{ request('search') }}">
+                </form>
+
+                {{-- Pagination --}}
+                <div class="pagination">
+                    {{-- Previous --}}
+                    @if ($histories->onFirstPage())
+                        <button class="page-btn" disabled><i class="fas fa-chevron-left"></i></button>
+                    @else
+                        <a href="{{ $histories->previousPageUrl() }}" class="page-btn"><i class="fas fa-chevron-left"></i></a>
+                    @endif
+
+                    {{-- Page numbers --}}
+                    @foreach ($histories->getUrlRange(1, $histories->lastPage()) as $page => $url)
+                        @if ($page == $histories->currentPage())
+                            <span class="page-btn active">{{ $page }}</span>
+                        @else
+                            <a href="{{ $url }}" class="page-btn">{{ $page }}</a>
+                        @endif
+                    @endforeach
+
+                    {{-- Next --}}
+                    @if ($histories->hasMorePages())
+                        <a href="{{ $histories->nextPageUrl() }}" class="page-btn"><i class="fas fa-chevron-right"></i></a>
+                    @else
+                        <button class="page-btn" disabled><i class="fas fa-chevron-right"></i></button>
+                    @endif
+
+                    {{-- Info --}}
+                    <span class="page-info">
+                        Page {{ $histories->currentPage() }} of {{ $histories->lastPage() }}
+                    </span>
+                </div>
             </div>
         </div>
     </div>

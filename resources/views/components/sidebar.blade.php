@@ -9,12 +9,12 @@
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
-        <a href="{{ url('/send-message') }}" class="menu-item  {{ Request::is('send-message') ? 'active' : '' }}">
+        <a href="{{ route('message') }}" class="menu-item  {{ Request::is('send-message') ? 'active' : '' }}">
             <i class="fas fa-paper-plane"></i>
             <span>Send Message</span>
         </a>   
         
-        <a href="{{ url('/wa-login') }}" class="menu-item  {{ Request::is('wa-login') ? 'active' : '' }}">
+        <a href="{{ route('loginwhatsapp') }}" class="menu-item  {{ Request::is('wa-login') ? 'active' : '' }}">
             <i class="fas fa-qrcode"></i>
             <span>Login WhatsApp</span>
         </a>
@@ -22,24 +22,24 @@
         <div class="divider"></div>
         
 
-        <a href="{{ url('/user') }}" class="menu-item  {{ Request::is('user') ? 'active' : '' }}">
+        <a href="{{ route('user') }}" class="menu-item  {{ Request::is('user') ? 'active' : '' }}">
             <i class="fas fa-user"></i>
             <span>My Profile</span>
         </a>
 
-        <a href="{{ url('/history') }}" class="menu-item  {{ Request::is('history') ? 'active' : '' }}">
+        <a href="{{ route('history') }}" class="menu-item  {{ Request::is('history') ? 'active' : '' }}">
             <i class="fas fa-history"></i>
             <span>History</span>
         </a>
 
-        <a href="{{ url('/report') }}" class="menu-item  {{ Request::is('report') ? 'active' : '' }}">
+        <a href="{{ route('report') }}" class="menu-item  {{ Request::is('report') ? 'active' : '' }}">
             <i class="fas fa-chart-line"></i>
             <span>Report</span>
         </a>
         
         <div class="divider"></div>
 
-        <a href="{{ url('/settings') }}" class="menu-item  {{ Request::is('settings') ? 'active' : '' }}">
+        <a href="{{ route('settings') }}" class="menu-item  {{ Request::is('settings') ? 'active' : '' }}">
             <i class="fas fa-cog"></i>
             <span>Settings</span>
         </a>
