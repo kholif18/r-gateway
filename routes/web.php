@@ -23,13 +23,21 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/report', [ReportController::class, 'index'])->name('report');
 
-    Route::get('/wa-login', [WhatsappLoginController::class, 'index'])->name('loginwhatsapp');
-    Route::get('/whatsapp/qr', [WhatsappLoginController::class, 'qr']);
-    Route::get('/whatsapp/status', [WhatsappLoginController::class, 'status']);
-    Route::post('/whatsapp/logout', function () {
-        Http::get(env('WA_GATEWAY_API') . '/instance/default/logout');
-        return back()->with('status', 'Berhasil logout dari WhatsApp.');
+    Route::get('/whatsapp/login', [WhatsappLoginController::class, 'index'])->name('login.whatsapp');
+    Route::get('/whatsapp/start', function () {
+        $response = Http::get('http://wa-gateway:3000/session/start?session=user_27');
+        return $response->json();
     });
+    Route::get('/whatsapp/status', function () {
+        $response = Http::get('http://wa-gateway:3000/whatsapp/status');
+        return $response->json();
+    });
+
+    Route::get('/whatsapp/qr', function () {
+        $response = Http::get('http://wa-gateway:3000/whatsapp/qr');
+        return $response->json();
+    });
+    Route::post('/whatsapp/logout', [WhatsappLoginController::class, 'logout']);
 
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
     Route::post('/settings/save', [SettingsController::class, 'save']);
