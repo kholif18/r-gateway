@@ -21,6 +21,8 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->string('password');
             $table->string('avatar')->nullable();
+            $table->string('wa_number')->nullable()->unique();
+            $table->boolean('wa_connected')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });

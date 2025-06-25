@@ -14,7 +14,11 @@
             <span>Send Message</span>
         </a>   
         
+<<<<<<< HEAD
         <a href="{{ route('login.whatsapp') }}" class="menu-item  {{ Request::is('wa-login') ? 'active' : '' }}">
+=======
+        <a href="{{ route('wa.login') }}" class="menu-item  {{ Request::is('wa-login') ? 'active' : '' }}">
+>>>>>>> 46d8188ffa3dba89c3306f41ef99763997932259
             <i class="fas fa-qrcode"></i>
             <span>Login WhatsApp</span>
         </a>

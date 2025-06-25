@@ -16,7 +16,7 @@
                 <div class="alert alert-danger">{{ session('error') }}</div>
             @endif
 
-            <form action="{{ url('/send') }}" method="POST">
+            <form method="POST" action="{{ url('/wa/send') }}">
             @csrf
                 <div class="form-container">
                     <div class="form-section">

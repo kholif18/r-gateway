@@ -8,6 +8,7 @@ use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WhatsappLoginController;
 
@@ -45,6 +46,15 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profile', [UserController::class, 'edit'])->middleware(['auth'])->name('profile.edit');
     Route::put('/profile', [UserController::class, 'update'])->name('profile.update');
+
+    // routes/web.php
+    Route::get('/wa/qr', [WhatsAppController::class, 'qr']);
+    Route::post('/wa/send', [WhatsAppController::class, 'send']);
+
+    
+    Route::get('/wa-login', function () {
+        return view('wa-login');
+    })->name('wa.login');
 });
 
 

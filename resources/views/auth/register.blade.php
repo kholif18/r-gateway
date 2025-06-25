@@ -25,41 +25,41 @@
                     
                     <form method="POST" action="{{ route('register') }}">
                     @csrf
-                        <div class="mb-4">
+                        <div class="mb-2">
                             <label for="name">Name</label>
-                            <input id="name" class="form-control" type="text" name="name" required autofocus>
+                            <input id="name" class="form-control" type="text" name="name" placeholder="Name..." required autofocus>
                         </div>
 
-                        <div class="mb-4">
+                        <div class="mb-2">
                             <label for="username">Username</label>
-                            <input id="username" class="form-control" type="text" name="username" required>
+                            <input id="username" class="form-control" type="text" name="username" placeholder="username" required>
                             @error('username')
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
                         </div>
 
-                        <div class="mb-4">
+                        <div class="mb-2">
                             <label for="email">Email</label>
-                            <input id="email" class="form-control" type="email" name="email" required>
+                            <input id="email" class="form-control" type="email" name="email" placeholder="mail@example.com" required>
                             @error('email')
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
                         </div>
                         
-                        <div class="mb-4">
+                        <div class="mb-2">
                             <label for="password">Password</label>
                             <div class="password-container">
-                                <input id="password" class="form-control" type="password" name="password" required>
+                                <input id="password" class="form-control" type="password" name="password" placeholder="********" required>
                                 <span class="password-toggle" id="toggle-password-1">
                                     <i class="fas fa-eye"></i>
                                 </span>
                             </div>
                         </div>
                         
-                        <div class="mb-4">
+                        <div class="mb-2">
                             <label for="password_confirmation">Confirm Password</label>
                             <div class="password-container">
-                                <input id="password_confirmation" class="form-control" type="password" name="password_confirmation" required>
+                                <input id="password_confirmation" class="form-control" type="password" name="password_confirmation" placeholder="********" required>
                                 <span class="password-toggle" id="toggle-password-2">
                                     <i class="fas fa-eye"></i>
                                 </span>

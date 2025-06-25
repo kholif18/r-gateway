@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'whatsapp' => [
+        'url' => env('WHATSAPP_API_URL', 'http://wa-automate:3000/api'),
+        'key' => env('WHATSAPP_API_KEY'),
+        'session_id' => env('WHATSAPP_SESSION_ID', 'default'),
+    ],
+
 ];
