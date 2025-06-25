@@ -8,15 +8,13 @@
             <div class="card-title">Test Message</div>
         </div>
         <div class="card-body">
-            @if(session('status'))
-                <div class="alert alert-success">{{ session('status') }}</div>
-            @endif
-
-            @if(session('error'))
+            @if (session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @elseif (session('error'))
                 <div class="alert alert-danger">{{ session('error') }}</div>
             @endif
 
-            <form method="POST" action="{{ url('/wa/send') }}">
+            <form method="POST" action="{{ route('whatsapp.message.send') }}">
             @csrf
                 <div class="form-container">
                     <div class="form-section">

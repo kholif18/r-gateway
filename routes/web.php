@@ -7,16 +7,17 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\WhatsAppController;
+use App\Http\Controllers\WhatsappController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WhatsappLoginController;
 
 Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/send-message', [MessageController::class, 'index'])->name('message');
-    Route::post('/send', [MessageController::class, 'send']);
+    Route::get('/whatsapp/send-message', [MessageController::class, 'index'])->name('whatsapp.message');
+    Route::post('/whatsapp/send-message', [MessageController::class, 'send'])->name('whatsapp.message.send');
 
     Route::get('/user', [HistoryController::class, 'user'])->name('user');
     Route::get('/history', [HistoryController::class, 'index'])->name('history');
@@ -24,21 +25,18 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/report', [ReportController::class, 'index'])->name('report');
 
-    Route::get('/whatsapp/login', [WhatsappLoginController::class, 'index'])->name('login.whatsapp');
-    Route::get('/whatsapp/start', function () {
-        $response = Http::get('http://wa-gateway:3000/session/start?session=user_27');
-        return $response->json();
-    });
-    Route::get('/whatsapp/status', function () {
-        $response = Http::get('http://wa-gateway:3000/whatsapp/status');
-        return $response->json();
+    Route::post('/webhook/session', [WebhookController::class, 'session']);
+    Route::post('/webhook/message', [WebhookController::class, 'message']);
+
+    Route::prefix('whatsapp')->group(function () {
+        Route::get('/login', [WhatsappLoginController::class, 'index'])->name('login.whatsapp');
+        Route::get('/status', [WhatsappLoginController::class, 'status'])->name('whatsapp.status');
+        Route::get('/qr', [WhatsappLoginController::class, 'qr'])->name('whatsapp.qr');
+        Route::post('/logout', [WhatsappLoginController::class, 'logout'])->name('whatsapp.logout');
     });
 
-    Route::get('/whatsapp/qr', function () {
-        $response = Http::get('http://wa-gateway:3000/whatsapp/qr');
-        return $response->json();
-    });
-    Route::post('/whatsapp/logout', [WhatsappLoginController::class, 'logout']);
+    Route::get('/whatsapp/start', [WhatsappLoginController::class, 'start'])->name('whatsapp.start');
+
 
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
     Route::post('/settings/save', [SettingsController::class, 'save']);
@@ -46,15 +44,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profile', [UserController::class, 'edit'])->middleware(['auth'])->name('profile.edit');
     Route::put('/profile', [UserController::class, 'update'])->name('profile.update');
-
-    // routes/web.php
-    Route::get('/wa/qr', [WhatsAppController::class, 'qr']);
-    Route::post('/wa/send', [WhatsAppController::class, 'send']);
-
-    
-    Route::get('/wa-login', function () {
-        return view('wa-login');
-    })->name('wa.login');
 });
 
 

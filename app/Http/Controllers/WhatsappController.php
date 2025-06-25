@@ -6,9 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
-class WhatsappLoginController extends Controller
+class WhatsappController extends Controller
 {
     protected $backendUrl;
 
@@ -22,43 +21,27 @@ class WhatsappLoginController extends Controller
         return 'user_' . Auth::id();
     }
 
-    public function index()
-    {
-        return view('wa-login');
-    }
-
-    public function start()
+    public function startSession()
     {
         $session = $this->getSessionName();
 
+        // Mulai session
         $res = Http::get("{$this->backendUrl}/session/start", [
             'session' => $session
         ]);
 
-        return response()->json([
-            'message' => $res->json('message') ?? 'Gagal start',
-            'status' => $res->status()
-        ]);
-    }
-
-
-    public function qr()
-    {
-        $session = $this->getSessionName();
-
-        $status = Cache::get("whatsapp_status_{$session}", 'DISCONNECTED');
-        if ($status === 'CONNECTED') {
-            return response()->json(['error' => 'Sudah terhubung'], 400);
+        if ($res->failed()) {
+            return response()->json(['error' => $res->json('message') ?? 'Gagal membuat sesi'], 400);
         }
 
-        // Panggil hanya /session/qr, tanpa start ulang
+        return response()->json(['message' => 'Session dimulai']);
+    }
+
+    public function getQr()
+    {
+        $session = $this->getSessionName();
         $res = Http::get("{$this->backendUrl}/session/qr", [
             'session' => $session
-        ]);
-
-        Log::info('QR Response', [
-            'body' => $res->body(),
-            'status' => $res->status()
         ]);
 
         if ($res->ok() && $res->json('qr')) {
@@ -79,13 +62,10 @@ class WhatsappLoginController extends Controller
     public function logout()
     {
         $session = $this->getSessionName();
-
         $res = Http::get("{$this->backendUrl}/session/logout", [
             'session' => $session
         ]);
 
-        Cache::forget("whatsapp_status_{$session}");
-
-        return redirect()->back()->with('success', 'Berhasil logout dari WhatsApp');
+        return redirect()->back()->with('success', 'Logout berhasil');
     }
 }

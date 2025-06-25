@@ -1,7 +1,11 @@
 <div class="sidebar">
     <div class="sidebar-header">
-        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTcgNGgzYTIgMiAwIDAgMSAyIDJ2MTRhMiAyIDAgMCAxLTIgMkg0YTIgMiAwIDAgMS0yLTJWNmEyIDIgMCAwIDEgMi0yaDciPjwvcGF0aD48cGF0aCBkPSJNMTcgMTdWNGEyIDIgMCAwIDAtMi0ySDhhMiAyIDAgMCAwLTIgMnYxM2EyIDIgMCAwIDAgMiAyaDdhMiAyIDAgMCAwIDItMnoiPjwvcGF0aD48L3N2Zz4=" alt="Logo">
-        <h2>WA-Gateway</h2>
+        <div class="logo">
+            <a href="{{ url('/') }}">
+                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xNyA0aDNhMiAyIDAgMCAxIDIgMnYxNGEyIDIgMCAwIDEtMiAySDRhMiAyIDAgMCAxLTItMlY2YTIgMiAwIDAgMSAyLTJoNyI+PC9wYXRoPjxwYXRoIGQ9Ik0xNyAxN1Y0YTIgMiAwIDAgMC0yLTJIOGEyIDIgMCAwIDAtMiAydjEzYTIgMiAwIDAgMCAyIDJoN2EyIDIgMCAwIDAgMi0yeiI+PC9wYXRoPjwvc3ZnPg==" alt="Logo">
+                <h2>WA Gateway</h2>
+            </a>
+        </div>
     </div>
     
     <div class="sidebar-menu">
@@ -9,16 +13,12 @@
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
-        <a href="{{ route('message') }}" class="menu-item  {{ Request::is('send-message') ? 'active' : '' }}">
+        <a href="{{ route('whatsapp.message') }}" class="menu-item  {{ Route::is('whatsapp.message') ? 'active' : '' }}">
             <i class="fas fa-paper-plane"></i>
             <span>Send Message</span>
         </a>   
         
-<<<<<<< HEAD
-        <a href="{{ route('login.whatsapp') }}" class="menu-item  {{ Request::is('wa-login') ? 'active' : '' }}">
-=======
-        <a href="{{ route('wa.login') }}" class="menu-item  {{ Request::is('wa-login') ? 'active' : '' }}">
->>>>>>> 46d8188ffa3dba89c3306f41ef99763997932259
+        <a href="{{ route('login.whatsapp') }}" class="menu-item  {{ Route::is('login.whatsapp') ? 'active' : '' }}">
             <i class="fas fa-qrcode"></i>
             <span>Login WhatsApp</span>
         </a>

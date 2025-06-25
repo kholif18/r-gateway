@@ -16,7 +16,7 @@ class DashboardController extends Controller
         $successRate = 98; // hitung dari data terkirim vs total
         $lastMessage = Report::latest('sent_at')->first();
 
-        return view('index', compact(
+        return view('dashboard', compact(
             'gatewayStatus', 'sentToday', 'sentTodayGrowth', 'successRate', 'lastMessage'
         ));
     }

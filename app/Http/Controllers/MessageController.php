@@ -3,10 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Services\WhatsAppService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 
 class MessageController extends Controller
 {
+    protected $wa;
+
+    public function __construct()
+    {
+        $this->wa = new WhatsAppService();
+    }
+
     public function index()
     {
         return view('send-message');
@@ -14,26 +23,22 @@ class MessageController extends Controller
 
     public function send(Request $request)
     {
+        $request->validate([
+            'number' => 'required|string',
+            'message' => 'required|string',
+        ]);
+
         try {
-            $response = Http::post(env('WA_GATEWAY_API') . '/api/send-message', [
-                'number' => $request->number,
-                'message' => $request->message,
-            ]);
+            $response = $this->wa->sendMessage($request->number, $request->message);
 
-            if ($response->successful()) {
-                $resBody = $response->json();
-
-                if (isset($resBody['status']) && $resBody['status'] === false) {
-                    return back()->with('error', $resBody['message'] ?? 'Gagal mengirim pesan. Periksa koneksi device.');
-                }
-
-                return back()->with('status', 'Pesan berhasil dikirim!');
-            } else {
-                return back()->with('error', 'Gagal mengirim pesan. Server wa-gateway tidak merespons.');
+            if (isset($response['status']) && $response['status'] === true) {
+                return back()->with('success', 'Pesan berhasil dikirim');
             }
 
+            return back()->with('error', $response['error'] ?? 'Gagal mengirim pesan');
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            Log::error('Send message error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat mengirim pesan');
         }
     }
 }
