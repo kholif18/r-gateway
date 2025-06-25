@@ -3,7 +3,7 @@
 @section('title', 'Login')
 
 @section('content')
-    <div class="qr-container">
+<div class="qr-container">
         <h2>Login WhatsApp</h2>
         <p>Scan QR Code untuk menghubungkan akun WhatsApp Anda</p>
         
@@ -11,12 +11,13 @@
             <div class="col-12 col-md-6">
                 <div class="qr-box">
                     <div class="qr-placeholder">
-                        <!-- QR code akan muncul di sini -->
-                    </div>
+                        <img src="data:image/png;base64,{{ $qr }}" alt="QR Code">
                     <p>QR Code akan diperbarui setiap 60 detik</p>
                 </div>
-                
-                <button class="btn">
+                <div id="status-message" class="alert alert-info">
+                    Preparing QR code...
+                </div>
+                <button id="refresh-btn" class="btn">
                     <i class="fas fa-sync"></i> Generate New QR Code
                 </button>
             </div>
@@ -43,15 +44,17 @@
                 <p>Status: <span style="color: var(--primary); font-weight: bold;">Menunggu Scan QR Code</span></p>
                 <p style="margin-top: 10px;">Terakhir terhubung: 23 Juni 2025, 14:30 WIB</p>
             </div>
-            <form method="POST" action="/whatsapp/logout" id="logout-form" style="display: none;">
+            <form method="POST" action="{{ route('whatsapp.logout') }}" id="logout-form" style="display: none;">
                 @csrf
-                <button type="submit" class="btn btn-danger">Logout</button>
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                </button>
             </form>
 
         </div>
     </div>
 
-    <script>
+    {{-- <script>
         function fetchStatus() {
             fetch('/whatsapp/status')
                 .then(res => res.json())
@@ -95,6 +98,198 @@
         // Panggil pertama kali
         fetchStatus();
         fetchQR();
+    </script> --}}
+    {{-- <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">Login WhatsApp</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <p class="lead">Scan QR Code untuk menghubungkan akun WhatsApp Anda</p>
+                        </div>
+                        
+                        <div class="row">
+                            <!-- QR Code Section -->
+                            <div class="col-md-6 mb-4 mb-md-0">
+                                <div class="border p-3 text-center">
+                                    <div id="qr-container" class="mb-3">
+                                        <div id="qr-image-placeholder" class="d-flex justify-content-center align-items-center" style="height: 250px; background-color: #f8f9fa;">
+                                            <div class="text-center">
+                                                <i class="fas fa-spinner fa-spin fa-3x text-primary"></i>
+                                                <p class="mt-2">Memuat QR Code...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="qr-message" class="alert alert-info mb-3">
+                                        QR Code akan diperbarui setiap 60 detik
+                                    </div>
+                                    <button id="refresh-btn" class="btn btn-primary">
+                                        <i class="fas fa-sync-alt mr-2"></i> Generate QR Code Baru
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Instructions Section -->
+                            <div class="col-md-6">
+                                <div class="border p-3 h-100">
+                                    <h4 class="text-center mb-3">Petunjuk Penggunaan:</h4>
+                                    <ol class="pl-3">
+                                        <li class="mb-2">Buka aplikasi WhatsApp di ponsel Anda</li>
+                                        <li class="mb-2">Klik menu titik tiga (⋮) di pojok kanan atas</li>
+                                        <li class="mb-2">Pilih "Linked Devices"</li>
+                                        <li class="mb-2">Klik "Link a Device"</li>
+                                        <li class="mb-2">Arahkan kamera ponsel Anda ke QR Code di samping</li>
+                                        <li class="mb-2">Tunggu hingga proses koneksi selesai</li>
+                                    </ol>
+                                    <div class="alert alert-warning mt-3">
+                                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                                        Jangan bagikan QR Code ini kepada siapapun!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Connection Status -->
+                        <div class="mt-4">
+                            <div class="card">
+                                <div class="card-header bg-secondary text-white">
+                                    <h5 class="mb-0">Status Koneksi</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <p class="mb-1">Status: 
+                                                <span id="connection-status" class="font-weight-bold" style="color: orange;">
+                                                    Menunggu Scan QR Code
+                                                </span>
+                                            </p>
+                                            <p class="mb-0 text-muted" id="last-connected">
+                                                Terakhir terhubung: -
+                                            </p>
+                                        </div>
+                                        <form method="POST" action="{{ route('whatsapp.logout') }}" id="logout-form" style="display: none;">
+                                            @csrf
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> --}}
+
+    <script>
+        // Fungsi untuk memuat QR Code
+        function fetchQRCode() {
+            const qrPlaceholder = document.getElementById('qr-image-placeholder');
+            const qrMessage = document.getElementById('qr-message');
+            
+            qrPlaceholder.innerHTML = `
+                <div class="text-center">
+                    <i class="fas fa-spinner fa-spin fa-3x text-primary"></i>
+                    <p class="mt-2">Memuat QR Code...</p>
+                </div>
+            `;
+            
+            fetch('{{ route("whatsapp.qr") }}')
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.qr) {
+                        qrPlaceholder.innerHTML = `
+                            <img src="${data.qr}" alt="WhatsApp QR Code" class="img-fluid">
+                        `;
+                        qrMessage.innerHTML = `
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Scan QR Code ini dengan WhatsApp mobile Anda
+                            <small class="d-block mt-1">Akan diperbarui dalam 60 detik</small>
+                        `;
+                    } else if (data.error) {
+                        qrPlaceholder.innerHTML = `
+                            <div class="text-center text-danger">
+                                <i class="fas fa-exclamation-triangle fa-3x"></i>
+                                <p class="mt-2">${data.error}</p>
+                            </div>
+                        `;
+                        qrMessage.innerHTML = `
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Gagal memuat QR Code. Silakan coba lagi.
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching QR:', error);
+                    qrPlaceholder.innerHTML = `
+                        <div class="text-center text-danger">
+                            <i class="fas fa-exclamation-triangle fa-3x"></i>
+                            <p class="mt-2">Terjadi kesalahan</p>
+                        </div>
+                    `;
+                    qrMessage.innerHTML = `
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Gagal terhubung ke server. Silakan refresh halaman.
+                    `;
+                });
+        }
+
+        // Fungsi untuk memeriksa status koneksi
+        function checkConnectionStatus() {
+            fetch('{{ route("whatsapp.status") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const statusElement = document.getElementById('connection-status');
+                    const lastConnectedElement = document.getElementById('last-connected');
+                    const logoutForm = document.getElementById('logout-form');
+                    const qrContainer = document.getElementById('qr-container');
+
+                    if (data.state === 'CONNECTED' || data.status === 'CONNECTED') {
+                        statusElement.textContent = "Terhubung ke WhatsApp";
+                        statusElement.style.color = 'green';
+                        qrContainer.style.display = 'none';
+                        logoutForm.style.display = 'block';
+                        lastConnectedElement.textContent = 'Terakhir terhubung: ' + new Date().toLocaleString('id-ID', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            timeZoneName: 'short'
+                        });
+                    } else {
+                        statusElement.textContent = "Menunggu Scan QR Code";
+                        statusElement.style.color = 'orange';
+                        qrContainer.style.display = 'block';
+                        logoutForm.style.display = 'none';
+                    }
+                });
+        }
+
+        // Event listener untuk tombol refresh
+        document.getElementById('refresh-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            fetchQRCode();
+        });
+
+        // Jalankan pertama kali
+        fetchQRCode();
+        checkConnectionStatus();
+
+        // Auto-refresh setiap 5 detik
+        setInterval(checkConnectionStatus, 5000);
+        
+        // Refresh QR code setiap 60 detik
+        setInterval(fetchQRCode, 60000);
     </script>
 
 @endsection

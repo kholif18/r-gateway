@@ -27,7 +27,7 @@
                     @csrf
                         <div class="mb-4">
                             <label for="login">Email</label>
-                            <input id="login" class="form-control" type="text" name="login" required autofocus autocomplete="username">
+                            <input id="login" class="form-control" type="text" name="login" placeholder="Email or username" required autofocus autocomplete="username">
                             @error('login')
                                 <span class="text-danger text-sm">{{ $message }}</span>
                             @enderror
@@ -36,7 +36,7 @@
                         <div class="mb-4">
                             <label for="password">Password</label>
                             <div class="password-container">
-                                <input id="password" class="form-control" type="password" name="password" required autocomplete="current-password">
+                                <input id="password" class="form-control" type="password" name="password" placeholder="********" required autocomplete="current-password">
                                 <span class="password-toggle" id="toggle-password">
                                     <i class="fas fa-eye"></i>
                                 </span>
@@ -59,7 +59,7 @@
                         </div>
                         
                         <div class="auth-footer">
-                            <p>Lupa password? <a href="{{ route('password.store') }}" id="forgot-password">Reset password</a></p>
+                            <p class="mb-2">Lupa password? <a href="{{ route('password.email') }}" id="forgot-password">Reset password</a></p>
                             <p>Belum punya akun? <a href="{{ route('register') }}" id="register-link">Buat akun baru</a></p>
                         </div>
                     </form>

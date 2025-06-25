@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>WA Gateway | Login </title>
+        <title>WA Gateway | Reset Password </title>
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
@@ -20,15 +20,20 @@
                 <div class="auth-form">
                     <div class="auth-header">
                         <h2>Reset Password</h2>
-                        <p>Masukkan password baru.</p>
+                        <p>Masukkan OTP dari whatsapp anda dan buat password baru.</p>
                     </div>
                     
-                    <form method="POST" action="{{ route('password.store') }}">
+                    <form method="POST" action="{{ route('password.wa-reset') }}">
                     @csrf
-                        <input type="hidden" name="token" value="{{ $request->route('token') }}">
-                        <input type="hidden" name="email" value="{{ old('email', $request->email) }}">
+                        <div class="mb-2">
+                            <input class="form-control" type="text" name="phone" placeholder="Nomor WhatsApp" required>
+                        </div>
+
+                        <div class="mb-2">
+                            <input class="form-control" type="text" name="otp" placeholder="Kode OTP" required>
+                        </div>
                         
-                        <div class="mb-4">
+                        <div class="mb-2">
                             <label for="password">New Password</label>
                             <div class="password-container">
                                 <input id="password" class="form-control" type="password" name="password" placeholder="********" required autocomplete="new-password">
@@ -41,7 +46,7 @@
                             @enderror
                         </div>
                         
-                        <div class="mb-4">
+                        <div class="mb-2">
                             <label for="password_confirmation">Confirm Password</label>
                             <div class="password-container">
                                 <input id="password_confirmation" class="form-control" type="password" name="password_confirmation" placeholder="********" required autocomplete="new-password">

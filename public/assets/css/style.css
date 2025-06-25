@@ -728,6 +728,15 @@ textarea.form-control {
     resize: vertical;
 }
 
+.form-control::placeholder {
+  color: #6c757d;
+  opacity: 0.6;
+}
+
+input:focus::placeholder {
+    opacity: 0;
+}
+
 .btn {
     background-color: var(--primary);
     color: white;

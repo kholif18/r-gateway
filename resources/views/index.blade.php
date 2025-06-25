@@ -5,14 +5,15 @@
 @section('content')
     <div class="dashboard-overview">
         <!-- Status Gateway Card -->
-        <div class="status-card status-connected">
+        <div class="status-card {{ $gatewayStatus ? 'status-connected' : 'status-disconnected' }}">
             <div class="card-icon">
                 <i class="fas fa-plug"></i>
             </div>
-            <div class="card-value">Terhubung</div>
+            <div class="card-value">{{ $gatewayStatus ? 'Terhubung' : 'Terputus' }}</div>
             <div class="card-title">Status Gateway</div>
-            <div class="card-badge status-badge-connected">
-                <i class="fas fa-check-circle"></i> Aktif
+            <div class="card-badge {{ $gatewayStatus ? 'status-badge-connected' : 'status-badge-disconnected' }}">
+                <i class="fas {{ $gatewayStatus ? 'fa-check-circle' : 'fa-exclamation-circle' }}"></i>
+                {{ $gatewayStatus ? 'Aktif' : 'Tidak Aktif' }}
             </div>
         </div>
         
@@ -21,10 +22,10 @@
             <div class="card-icon">
                 <i class="fas fa-paper-plane"></i>
             </div>
-            <div class="card-value">142</div>
+            <div class="card-value">{{ $sentToday }}</div>
             <div class="card-title">Pesan Terkirim Hari Ini</div>
             <div class="card-badge status-badge-connected">
-                <i class="fas fa-arrow-up"></i> 12%
+                <i class="fas fa-arrow-up"></i> {{ $sentTodayGrowth }}%
             </div>
         </div>
         
@@ -33,7 +34,7 @@
             <div class="card-icon">
                 <i class="fas fa-user-check"></i>
             </div>
-            <div class="card-value">98%</div>
+            <div class="card-value">{{ $successRate }}%</div>
             <div class="card-title">Tingkat Keberhasilan</div>
             <div class="card-badge status-badge-connected">
                 <i class="fas fa-chart-line"></i> Stabil
@@ -72,28 +73,31 @@
     <div class="last-message-card">
         <div class="last-message-header">
             <div class="last-message-title">Pesan Terakhir</div>
-            <div class="last-message-time">23 Jun 2025, 14:30 WIB</div>
+            <div class="last-message-time">{{ $lastMessage?->sent_at->format('d M Y, H:i') ?? '-' }}</div>
         </div>
         
+        @if ($lastMessage)
         <div class="message-container">
-            <div class="message-avatar">JD</div>
+            <div class="message-avatar">{{ strtoupper(substr($lastMessage->recipient_name, 0, 2)) }}</div>
             <div class="message-content">
                 <div class="message-header">
-                    <div class="message-sender">John Doe</div>
-                    <div class="message-time">14:30</div>
+                    <div class="message-sender">{{ $lastMessage->recipient_name }}</div>
+                    <div class="message-time">{{ $lastMessage->sent_at->format('H:i') }}</div>
                 </div>
                 <div class="message-text">
-                    Halo, saya ingin menanyakan status pesanan saya dengan nomor INV-2025-00654. 
-                    Sudah 2 hari belum juga dikirim. Mohon informasinya.
+                    {{ $lastMessage->message }}
                 </div>
                 <div class="message-status status-delivered">
-                    <i class="fas fa-check-circle"></i> Terkirim
+                    <i class="fas fa-check-circle"></i> {{ ucfirst($lastMessage->status) }}
                 </div>
             </div>
         </div>
+        @else
+            <div class="text-center">Belum ada pesan yang dikirim.</div>
+        @endif
     </div>
 
-    <script>
+    {{-- <script>
         // Simulate connection status change
         setInterval(() => {
             const statusCard = document.querySelector('.status-card.status-connected');
@@ -109,5 +113,5 @@
                 statusCard.querySelector('.card-badge').innerHTML = '<i class="fas fa-check-circle"></i> Aktif';
             }
         }, 10000);
-    </script>
+    </script> --}}
 @endsection
