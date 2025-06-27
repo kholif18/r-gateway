@@ -43,7 +43,7 @@
         
         <div class="divider"></div>
 
-        <a href="{{ route('api.clients') }}" class="menu-item  {{ Route::is('api.clients') ? 'active' : '' }}">
+        <a href="{{ route('clients.index') }}" class="menu-item  {{ Route::is('clients.index') ? 'active' : '' }}">
             <i class="fas fa-key"></i>
             <span>API Client</span>
         </a>

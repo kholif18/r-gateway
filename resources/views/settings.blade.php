@@ -10,42 +10,6 @@
         <div class="card-body">
             <form id="settings-form">
                 <div class="settings-container">
-                    <!-- API Token Settings -->
-                    <div class="settings-section">
-                        <div class="section-header">
-                            <div class="section-icon">
-                                <i class="fas fa-key"></i>
-                            </div>
-                            <div>
-                                <div class="section-title">Token API</div>
-                                <div class="section-description">Kelola token API untuk integrasi dengan sistem eksternal</div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="api-token">Token API</label>
-                            <div class="token-display">
-                                <input type="text" id="api-token" name="api_token" class="form-control" value="{{ $settings['api_token'] ?? ''}}" readonly>
-                                <button class="token-action" id="copy-token" title="Salin token">
-                                    <i class="fas fa-copy"></i>
-                                </button>
-                                <button class="token-action" id="refresh-token" title="Buat token baru">
-                                    <i class="fas fa-sync"></i>
-                                </button>
-                            </div>
-                            <div class="form-hint">Token ini digunakan untuk otentikasi saat mengakses API WA-Gateway</div>
-                        </div>
-                        
-                        <div class="toggle-container">
-                            <label class="toggle-label">Aktifkan API Access</label>
-                            <label class="switch">
-                                <input type="hidden" name="api_access" value="0">
-                                <input type="checkbox" name="api_access" value="1" {{ ($settings['api_access'] ?? '0') == '1' ? 'checked' : '' }}>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                    
                     <!-- Advanced Settings -->
                     <div class="settings-section">
                         <div class="section-header">

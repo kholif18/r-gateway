@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
-use App\Models\Report;
+use App\Models\MessageLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -12,7 +12,7 @@ class ReportController extends Controller
     public function index()
     {
         // Query utama untuk laporan (pakai pagination)
-        $reports = Report::select(
+        $reports = MessageLog::select(
                 DB::raw("DATE_FORMAT(sent_at, '%d %b %Y') as date"),
                 DB::raw('COUNT(*) as total')
             )
@@ -21,7 +21,7 @@ class ReportController extends Controller
             ->paginate(20); // <== Tambahkan pagination di sini
 
         // Query ulang (tanpa pagination) untuk chart
-        $chartQuery = Report::select(
+        $chartQuery = MessageLog::select(
                 DB::raw("DATE_FORMAT(sent_at, '%d %b %Y') as date"),
                 DB::raw('COUNT(*) as total')
             )

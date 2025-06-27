@@ -88,6 +88,30 @@ body {
     line-height:1.25rem
 }
 
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 0.25rem;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.badge-success {
+    background-color: #28a745; /* Hijau */
+}
+
+.badge-danger {
+    background-color: #dc3545; /* Merah */
+}
+
+.badge-warning {
+    background-color: #ffc107; /* Kuning */
+    color: #212529; /* Biar kontras di warna kuning */
+}
+
+
 /* Sidebar Styles */
 .sidebar {
     width: var(--sidebar-width);
@@ -422,6 +446,10 @@ body {
     background: linear-gradient(135deg, var(--danger), #c0392b);
 }
 
+.status-unknown {
+    background: linear-gradient(135deg, var(--warning), #bda229);
+}
+
 .status-messages {
     background: linear-gradient(135deg, var(--info), #2980b9);
 }
@@ -432,6 +460,11 @@ body {
 }
 
 .status-badge-disconnected {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.status-badge-unknown {
     background-color: rgba(255, 255, 255, 0.2);
     color: white;
 }
@@ -670,7 +703,6 @@ body {
     margin-top: 60px;
 }
 
-
 .btn-primary {
     background-color: var(--primary);
 }
@@ -695,6 +727,147 @@ body {
     background-color: var(--danger);
 }
 
+/* Base small button */
+.btn-sm {
+    font-size: 0.75rem !important;
+    padding: 0.25rem 0.5rem !important;
+    line-height: 1.2 !important;
+    border-radius: 0.2rem !important;
+    height: auto !important;
+    min-height: unset !important;
+}
+
+/* Solid small buttons */
+.btn-sm.btn-primary {
+    background-color: #4e73df;
+    border: 1px solid #4e73df;
+    color: white;
+}
+
+.btn-sm.btn-primary:hover {
+    background-color: #2e59d9;
+    border-color: #2e59d9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn-sm.btn-success {
+    background-color: #10b981;
+    border: 1px solid #10b981;
+    color: white;
+}
+
+.btn-sm.btn-success:hover {
+    background-color: #0ea672;
+    border-color: #0ea672;
+}
+
+.btn-sm.btn-danger {
+    background-color: #e74a3b;
+    border: 1px solid #e74a3b;
+    color: white;
+}
+
+.btn-sm.btn-danger:hover {
+    background-color: #c0392b;
+    border-color: #c0392b;
+}
+
+/* Outline-style (bootstrap-style) small buttons */
+.btn-sm.btn-outline-primary {
+    background-color: transparent;
+    border: 1px solid #4e73df;
+    color: #4e73df;
+}
+
+.btn-sm.btn-outline-primary:hover {
+    background-color: #4e73df;
+    color: white;
+}
+
+.btn-sm.btn-outline-success {
+    background-color: transparent;
+    border: 1px solid #10b981;
+    color: #10b981;
+}
+
+.btn-sm.btn-outline-success:hover {
+    background-color: #10b981;
+    color: white;
+}
+
+.btn-sm.btn-outline-danger {
+    background-color: transparent;
+    border: 1px solid #e74a3b;
+    color: #e74a3b;
+}
+
+.btn-sm.btn-outline-danger:hover {
+    background-color: #e74a3b;
+    color: white;
+}
+
+/* Icon only button (e.g. copy, delete) */
+.btn-sm.btn-icon {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Icon spacing */
+.btn-sm i {
+    font-size: 0.8rem;
+    margin-right: 3px;
+}
+
+/* Button states */
+.btn-sm:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.btn-sm:focus {
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    outline: none;
+}
+
+/* Loading state */
+.btn-sm.loading {
+    position: relative;
+    color: transparent !important;
+}
+
+.btn-sm.loading:after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin: -8px 0 0 -8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: btn-spin 0.6s linear infinite;
+}
+
+.copy-token {
+    cursor: pointer;
+    color: #10b981;
+    transition: color 0.3s;
+}
+.copy-token:hover {
+    color: #198754;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* Form Styles */
 .form-container {
@@ -1155,6 +1328,11 @@ label {
     border-radius: 8px;
     font-size: 15px;
     transition: border 0.3s;
+}
+
+.filter-control:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
 }
 
 .filter-control:focus {

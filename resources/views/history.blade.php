@@ -29,7 +29,7 @@
                         <label>Status</label>
                         <select name="status" class="filter-control">
                             <option value="all">All Status</option>
-                            @foreach(['delivered', 'read', 'pending', 'failed'] as $status)
+                            @foreach(['success', 'pending', 'failed'] as $status)
                                 <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>
                                     {{ ucfirst($status) }}
                                 </option>
@@ -60,13 +60,21 @@
                     <tbody>
                         @forelse($histories as $history)
                             <tr>
-                                <td>{{ \Carbon\Carbon::parse($history->sent_at)->format('d M Y, H:i') }}</td>
+                                <td>{{ ($history->sent_at)->format('d M Y, H:i') }}</td>
                                 <td>{{ $history->phone }}</td>
                                 <td class="message-preview" title="{{ $history->message }}">
                                     {{ Str::limit($history->message, 60, '...') }}
                                 </td>
                                 <td>
-                                    <span class="status-badge status-{{ $history->status }}">{{ ucfirst($history->status) }}</span>
+                                    @php
+                                        $statusClass = match($history->status) {
+                                            'success' => 'badge-success',
+                                            'failed' => 'badge-danger',
+                                            'pending' => 'badge-warning',
+                                            default => '',
+                                        };
+                                    @endphp
+                                    <span class="badge {{ $statusClass }}">{{ ucfirst($history->status) }}</span>
                                 </td>
                             </tr>
                         @empty

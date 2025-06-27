@@ -23,7 +23,8 @@
     },
     "autoload": {
         "files": [
-            "app/Helpers/setting.php"
+            "app/Helpers/setting.php",
+            "app/Helpers/WhatsappHelper.php"
         ],
         "psr-4": {
             "App\\": "app/",

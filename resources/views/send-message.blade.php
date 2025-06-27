@@ -25,14 +25,6 @@
                                 <input type="text" id="number" name="number" class="form-control" placeholder="6281234567890" required>
                             </div>
                         </div>
-                        <div class="form-group text-muted">
-                            <label for="key">Secret</label>
-                            <div class="search-box">
-                                <i class="fas fa-key"></i>
-                                <input type="text" id="key" name="key" class="form-control" value="sadkjhlaksdhlsakg" readonly>
-                            </div>
-                        </div>
-                        
                         <div class="form-group">
                             <label for="message">Message Content</label>
                             <textarea id="message" name="message" class="form-control" placeholder="Type your message here..."></textarea>

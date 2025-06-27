@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MessageLog;
 use Illuminate\Http\Request;
-use App\Models\MessageHistory;
 use Illuminate\Support\Facades\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class HistoryController extends Controller
 {
     public function index(Request $request)
     {
         $perPage = $request->get('per_page', 10);
-        $query = MessageHistory::query();
+        $query = MessageLog::query();
 
         // Filter tanggal
         if ($request->filled('from')) {
@@ -41,9 +42,9 @@ class HistoryController extends Controller
 
     public function export(Request $request)
     {
-        $query = MessageHistory::query();
+        $query = MessageLog::query();
 
-        // Filter seperti di index()
+        // Filter
         if ($request->filled('from')) {
             $query->whereDate('sent_at', '>=', $request->from);
         }
@@ -62,32 +63,29 @@ class HistoryController extends Controller
 
         $histories = $query->orderByDesc('sent_at')->get();
 
-        // Format CSV
         $filename = 'message-history-' . now()->format('Ymd-His') . '.csv';
+        $path = storage_path("app/tmp/$filename");
 
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"$filename\"",
-        ];
+        // Buat folder jika belum ada
+        if (!file_exists(dirname($path))) {
+            mkdir(dirname($path), 0777, true);
+        }
 
-        $callback = function () use ($histories) {
-            $file = fopen('php://output', 'w');
-            // Header
-            fputcsv($file, ['Date & Time', 'Phone', 'Message', 'Status']);
+        $file = fopen($path, 'w');
+        fputcsv($file, ['Date & Time', 'Phone', 'Message', 'Status']);
 
-            foreach ($histories as $h) {
-                fputcsv($file, [
-                    $h->sent_at ? $h->sent_at->format('d M Y, H:i') : '-',
-                    $h->phone,
-                    $h->message,
-                    ucfirst($h->status),
-                ]);
-            }
+        foreach ($histories as $h) {
+            fputcsv($file, [
+                $h->sent_at ? \Carbon\Carbon::parse($h->sent_at)->format('d M Y, H:i') : '-',
+                $h->phone,
+                $h->message,
+                ucfirst($h->status),
+            ]);
+        }
 
-            fclose($file);
-        };
+        fclose($file);
 
-        return Response::stream($callback, 200, $headers);
+        return response()->download($path)->deleteFileAfterSend(true);
     }
 
     public function user()

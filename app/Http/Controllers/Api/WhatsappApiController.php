@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Setting;
 use App\Models\ApiClient;
+use App\Models\MessageLog;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class WhatsappApiController extends Controller
@@ -48,21 +47,48 @@ class WhatsappApiController extends Controller
             return response()->json(['error' => 'Session belum dikonfigurasi untuk client ini'], 400);
         }
 
-        $response = Http::withHeaders([
-            'X-API-SECRET' => env('API_SECRET'),
-        ])->post(env('WA_BACKEND_URL') . '/session/send', [
-                'session' => $session,
-                'phone'   => $to,
-                'message' => $msg,
+        try {
+            $response = Http::withHeaders([
+                'X-API-SECRET' => env('API_SECRET'),
+            ])->post(env('WA_BACKEND_URL') . '/session/send', [
+                    'session' => $session,
+                    'phone'   => $to,
+                    'message' => $msg,
+                ]);
+
+            MessageLog::create([
+                'client_name'   => $clientName,
+                'session_name'  => $session,
+                'phone'         => $to,
+                'message'       => $msg,
+                'status'        => $response->successful() ? 'success' : 'failed',
+                'response'      => $response->body(),
+                'sent_at'       => $response->successful() ? now() : null,
             ]);
 
-        if ($response->successful()) {
-            return response()->json($response->json());
-        }
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
 
-        return response()->json([
-            'error' => 'Gagal mengirim ke backend',
-            'backend_response' => $response->body()
-        ], $response->status());
+            return response()->json([
+                'error' => 'Gagal mengirim ke backend',
+                'backend_response' => $response->body()
+            ], $response->status());
+        } catch (\Exception $e) {
+            // Log jika error koneksi/timeout
+            MessageLog::create([
+                'client_name'   => $clientName,
+                'session_name'  => $session,
+                'phone'         => $to,
+                'message'       => $msg,
+                'status'        => 'error',
+                'response'      => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'error' => 'Exception saat mengirim ke backend',
+                'exception' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

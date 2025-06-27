@@ -2,32 +2,68 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Report;
+use Carbon\Carbon;
+use App\Models\MessageLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $gatewayStatus = true; // atau hasil pengecekan status gateway
-        $sentToday = Report::whereDate('sent_at', today())->count();
-        $sentTodayGrowth = 12; // hitung perubahan dibanding kemarin, jika ada
-        $successRate = 98; // hitung dari data terkirim vs total
-        $lastMessage = Report::latest('sent_at')->first();
+        // ✅ 1. Total pesan hari ini
+        $today = Carbon::today();
+        $sentToday = MessageLog::whereDate('sent_at', $today)->count();
+
+        // ✅ 2. Total pesan kemarin (untuk growth)
+        $yesterday = Carbon::yesterday();
+        $sentYesterday = MessageLog::whereDate('sent_at', $yesterday)->count();
+
+        // Hitung growth (jika kemarin = 0, maka default 100%)
+        $sentTodayGrowth = $sentYesterday > 0
+            ? round((($sentToday - $sentYesterday) / $sentYesterday) * 100)
+            : ($sentToday > 0 ? 100 : 0);
+
+        // ✅ 3. Tingkat keberhasilan (% pesan sukses)
+        $totalMessages = MessageLog::count();
+        $successCount = MessageLog::where('status', 'success')->count();
+        $successRate = $totalMessages > 0 ? round(($successCount / $totalMessages) * 100) : 0;
+
+        // ✅ 4. Ambil pesan terakhir
+        $lastMessage = MessageLog::latest('sent_at')->first();
 
         return view('dashboard', compact(
-            'gatewayStatus', 'sentToday', 'sentTodayGrowth', 'successRate', 'lastMessage'
+            'sentToday',
+            'sentTodayGrowth',
+            'successRate',
+            'lastMessage'
         ));
     }
 
     public function status()
     {
-        $sessionId = 'user_23';
-        $response = Http::get("http://localhost:3000/status", [
-            'sessionId' => $sessionId
-        ]);
+        if (!Auth::check() || !Auth::user()->username) {
+            return response()->json(['connected' => false, 'error' => 'Unauthorized or username missing'], 403);
+        }
 
-        return $response->json();
+        $session = Auth::user()->username;
+
+        try {
+            $response = Http::withHeaders([
+                'X-API-SECRET' => env('API_SECRET'),
+            ])->get(env('WA_BACKEND_URL') . "/session/status?session={$session}");
+
+            Log::debug('Dashboard Session status response:', $response->json());
+
+            return response()->json([
+                'connected' => $response->ok() && $response->json('status') === 'CONNECTED'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Gagal cek status gateway: ' . $e->getMessage());
+            return response()->json(['connected' => false, 'error' => $e->getMessage()], 500);
+        }
     }
+
 }
