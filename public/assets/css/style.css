@@ -1044,6 +1044,10 @@ input:focus::placeholder {
     margin: 20px 0;
 }
 
+#start-session {
+    z-index: 10;
+}
+
 .qr-placeholder {
     width: 250px;
     height: 250px;

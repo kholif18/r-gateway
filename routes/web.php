@@ -10,6 +10,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\WhatsappController;
+use App\Http\Controllers\ApiClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WhatsappLoginController;
 
@@ -25,18 +26,16 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/report', [ReportController::class, 'index'])->name('report');
 
-    Route::post('/webhook/session', [WebhookController::class, 'session']);
-    Route::post('/webhook/message', [WebhookController::class, 'message']);
+    // Route::post('/webhook/session', [WebhookController::class, 'session']);
+    // Route::post('/webhook/message', [WebhookController::class, 'message']);
 
     Route::prefix('whatsapp')->group(function () {
         Route::get('/login', [WhatsappLoginController::class, 'index'])->name('login.whatsapp');
+        Route::post('/start', [WhatsappLoginController::class, 'start'])->name('whatsapp.start');
         Route::get('/status', [WhatsappLoginController::class, 'status'])->name('whatsapp.status');
-        Route::get('/qr', [WhatsappLoginController::class, 'qr'])->name('whatsapp.qr');
+        Route::get('/qr-image', [WhatsappLoginController::class, 'getQrImage'])->name('whatsapp.qr-image');
         Route::post('/logout', [WhatsappLoginController::class, 'logout'])->name('whatsapp.logout');
     });
-
-    Route::get('/whatsapp/start', [WhatsappLoginController::class, 'start'])->name('whatsapp.start');
-
 
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
     Route::post('/settings/save', [SettingsController::class, 'save']);
@@ -44,6 +43,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profile', [UserController::class, 'edit'])->middleware(['auth'])->name('profile.edit');
     Route::put('/profile', [UserController::class, 'update'])->name('profile.update');
+
+    Route::get('/api-clients', [ApiClientController::class, 'index'])->name('api.clients');
 });
 
 

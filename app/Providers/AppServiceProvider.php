@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use Illuminate\Routing\Router;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use App\Http\Middleware\ApiTokenMiddleware;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,5 +31,7 @@ class AppServiceProvider extends ServiceProvider
 
         Route::middleware('web')
             ->group(base_path('routes/web.php'));
+
+        app(Router::class)->aliasMiddleware('api.token', ApiTokenMiddleware::class);
     }
 }

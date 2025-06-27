@@ -11,10 +11,12 @@ use Illuminate\Support\Facades\Log;
 class WhatsappLoginController extends Controller
 {
     protected $backendUrl;
+    protected $apiSecret;
 
     public function __construct()
     {
-        $this->backendUrl = env('WA_BACKEND_URL', 'http://wa-backend:3000');
+        $this->backendUrl = env('WA_BACKEND_URL');
+        $this->apiSecret = env('API_SECRET');
     }
 
     protected function getSessionName()
@@ -24,68 +26,78 @@ class WhatsappLoginController extends Controller
 
     public function index()
     {
-        return view('wa-login');
-    }
-
-    public function start()
-    {
-        $session = $this->getSessionName();
-
-        $res = Http::get("{$this->backendUrl}/session/start", [
-            'session' => $session
-        ]);
-
-        return response()->json([
-            'message' => $res->json('message') ?? 'Gagal start',
-            'status' => $res->status()
-        ]);
-    }
-
-
-    public function qr()
-    {
-        $session = $this->getSessionName();
-
+        $session = Auth::user()->username ?? null;
         $status = Cache::get("whatsapp_status_{$session}", 'DISCONNECTED');
-        if ($status === 'CONNECTED') {
-            return response()->json(['error' => 'Sudah terhubung'], 400);
-        }
 
-        // Panggil hanya /session/qr, tanpa start ulang
-        $res = Http::get("{$this->backendUrl}/session/qr", [
+        return view('wa-login', [
+            'status' => $status,
+            'session' => $session,
+        ]);
+    }
+
+    public function start(Request $request)
+    {
+        if (!Auth::check() || !Auth::user()->username) {
+            return response()->json(['error' => 'Unauthorized or username missing'], 403);
+        }
+        $session = Auth::user()->username;
+
+
+        $response = Http::withHeaders([
+            'X-API-SECRET' => $this->apiSecret,
+        ])->post("{$this->backendUrl}/session/start", [
             'session' => $session
         ]);
 
-        Log::info('QR Response', [
-            'body' => $res->body(),
-            'status' => $res->status()
-        ]);
+        return response()->json($response->json(), $response->status());
+    }
 
-        if ($res->ok() && $res->json('qr')) {
-            return response()->json(['qr' => $res->json('qr')]);
+    public function getQrImage()
+    {
+        if (!Auth::check() || !Auth::user()->username) {
+            return response()->json(['error' => 'Unauthorized or username missing'], 403);
+        }
+        $session = Auth::user()->username;
+
+
+        $response = Http::withHeaders([
+            'X-API-SECRET' => $this->apiSecret,
+        ])->get("{$this->backendUrl}/session/qr.png?session={$session}");
+
+        if ($response->ok()) {
+            return response($response->body(), 200)->header('Content-Type', 'image/png');
         }
 
-        return response()->json(['error' => 'QR tidak tersedia'], 400);
+        return response()->json(['error' => 'QR tidak tersedia'], 404);
     }
 
     public function status()
     {
-        $session = $this->getSessionName();
-        $status = Cache::get("whatsapp_status_{$session}", 'DISCONNECTED');
+        if (!Auth::check() || !Auth::user()->username) {
+            return response()->json(['error' => 'Unauthorized or username missing'], 403);
+        }
+        $session = Auth::user()->username;
 
-        return response()->json(['status' => $status]);
+
+        $response = Http::withHeaders([
+            'X-API-SECRET' => $this->apiSecret,
+        ])->get("{$this->backendUrl}/session/status?session={$session}");
+
+        return response()->json($response->json(), $response->status());
     }
 
     public function logout()
     {
-        $session = $this->getSessionName();
+        if (!Auth::check() || !Auth::user()->username) {
+            return response()->json(['error' => 'Unauthorized or username missing'], 403);
+        }
+        $session = Auth::user()->username;
 
-        $res = Http::get("{$this->backendUrl}/session/logout", [
-            'session' => $session
-        ]);
 
-        Cache::forget("whatsapp_status_{$session}");
+        $response = Http::withHeaders([
+            'X-API-SECRET' => $this->apiSecret,
+        ])->get("{$this->backendUrl}/session/logout?session={$session}");
 
-        return redirect()->back()->with('success', 'Berhasil logout dari WhatsApp');
+        return redirect()->route('whatsapp.login')->with('status', 'Berhasil logout');
     }
 }

@@ -43,6 +43,11 @@
         
         <div class="divider"></div>
 
+        <a href="{{ route('api.clients') }}" class="menu-item  {{ Route::is('api.clients') ? 'active' : '' }}">
+            <i class="fas fa-key"></i>
+            <span>API Client</span>
+        </a>
+
         <a href="{{ route('settings') }}" class="menu-item  {{ Request::is('settings') ? 'active' : '' }}">
             <i class="fas fa-cog"></i>
             <span>Settings</span>

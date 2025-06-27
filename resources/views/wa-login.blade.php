@@ -4,22 +4,18 @@
 
 @section('content')
     <div class="qr-container">
-        <h2>Login WhatsApp</h2>
-        <p>Scan QR Code untuk menghubungkan akun WhatsApp Anda</p>
+        <h2 id="qr-title">Login WhatsApp</h2>
+        <p  id="qr-description">Scan QR Code untuk menghubungkan akun WhatsApp Anda</p>
         
-        <div class="row mb-4">
+        <div class="row mb-4" id="qr-section">
             <div class="col-12 col-md-6">
                 <div class="qr-box">
                     <div class="qr-placeholder text-center p-4" id="qr-code-container">
                         <!-- QR code akan muncul di sini -->
-
                     </div>
                     <p>QR Code akan diperbarui setiap 60 detik</p>
                 </div>
-                <button id="start-session" class="btn btn-success mb-3">
-                    <i class="fas fa-play"></i> Mulai Sesi
-                </button>
-                <button id="refresh-qr" class="btn btn-primary mt-2">
+                <button id="refresh-qr" class="btn btn-success mt-2">
                     <i class="fas fa-sync"></i> Generate New QR Code
                 </button>
             </div>
@@ -44,6 +40,7 @@
             </div>
             <div class="card-body">
                 <p>Status: <span id="status-text" style="color: var(--primary); font-weight: bold;">Memeriksa status...</span></p>
+                <p>Session: <strong>{{ $session }}</strong></p>
                 <p id="last-connected" style="margin-top: 10px;"></p>
             </div>
             <!-- Form Logout WhatsApp -->
@@ -58,79 +55,102 @@
         </div>
     </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
+    <script>
         const qrContainer = document.getElementById('qr-code-container');
-        const refreshBtn = document.getElementById('refresh-qr');
         const statusText = document.getElementById('status-text');
-        const logoutSection = document.getElementById("whatsapp-logout");
+        const lastConnected = document.getElementById('last-connected');
+        const logoutForm = document.getElementById('whatsapp-logout');
 
-        document.getElementById('start-session').addEventListener('click', async function () {
-            const res = await fetch("{{ route('whatsapp.start') }}");
-            const data = await res.json();
-            alert(data.message || data.error);
-        });
-
-        async function loadQr() {
-            qrContainer.innerHTML = `<div class="text-center p-4">
-                <i class="fas fa-spinner fa-spin fa-2x"></i>
-                <p>Loading QR Code...</p>
-            </div>`;
-
-            try {
-                const res = await fetch(`{{ route('whatsapp.qr') }}`);
-                const data = await res.json();
-
-                if (data.qr) {
-                    qrContainer.innerHTML = `<img src="${data.qr}" class="img-fluid" alt="QR Code">`;
-                } else if (data.error) {
-                    qrContainer.innerHTML = `<p>${data.error}</p>`;
+        function startSession() {
+            fetch("{{ route('whatsapp.start') }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json'
                 }
-            } catch (err) {
-                qrContainer.innerHTML = `<p>Gagal memuat QR</p>`;
-                console.error('QR Error:', err);
-            }
+            }).then(res => res.json())
+            .then(data => console.log('Start session:', data));
         }
 
-        async function checkStatus() {
-            try {
-                const res = await fetch('{{ route("whatsapp.status") }}');
-                const data = await res.json();
-                
-                statusText.innerHTML = data.status === 'CONNECTED' 
-                    ? `<span class="text-success">Connected</span>` 
-                    : `<span class="text-warning">${data.status || 'Disconnected'}</span>`;
-                    
-                if (data.status === 'CONNECTED') {
-                    document.getElementById('whatsapp-logout').style.display = 'block';
+        function loadQrImage() {
+            fetch("{{ route('whatsapp.qr-image') }}?t=" + new Date().getTime())
+                .then(res => {
+                    if (!res.ok) throw new Error('QR tidak tersedia');
+                    return res.blob();
+                })
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    qrContainer.innerHTML = `<img src="${url}" width="300" />`;
+                })
+                .catch(err => {
+                    qrContainer.innerHTML = `<p style="color: red;">QR tidak tersedia</p>`;
+                });
+        }
+
+        function checkStatus() {
+            fetch("{{ route('whatsapp.status') }}")
+            .then(res => res.json())
+            .then(data => {
+                const statusText = document.getElementById("status-text");
+                const lastConnected = document.getElementById("last-connected");
+                const qrSection = document.getElementById("qr-section");
+                const qrTitle = document.getElementById("qr-title");
+                const qrDesc = document.getElementById("qr-description");
+                const refreshBtn = document.getElementById("refresh-qr");
+                const logoutCard = document.getElementById("whatsapp-logout");
+
+                if (data.status === "connected") {
+                    statusText.textContent = "Terkoneksi";
+                    statusText.style.color = "green";
+
+                    // Tambahkan waktu koneksi
+                    lastConnected.textContent = 'Tersambung pada: ' + new Date().toLocaleString('id-ID', {
+                        weekday: 'long', year: 'numeric', month: 'long',
+                        day: 'numeric', hour: '2-digit', minute: '2-digit'
+                    });
+
+                    // Sembunyikan bagian QR dan tombol refresh
+                    qrSection.style.display = "none";
+                    refreshBtn.style.display = "none";
+
+                    // Tampilkan tombol logout
+                    logoutCard.style.display = "block";
+
+                    // Ubah judul dan deskripsi
+                    qrTitle.textContent = "Perangkat Terkoneksi";
+                    qrDesc.textContent = "Anda sudah terhubung dengan WhatsApp.";
                 } else {
-                    document.getElementById('whatsapp-logout').style.display = 'none';
+                    statusText.textContent = "Belum terkoneksi";
+                    statusText.style.color = "red";
+
+                    lastConnected.textContent = ""; // Kosongkan info waktu
+
+                    // Tampilkan kembali QR dan refresh button
+                    qrSection.style.display = "flex";
+                    refreshBtn.style.display = "inline-block";
+                    logoutCard.style.display = "none";
+
+                    // Ubah kembali judul dan deskripsi
+                    qrTitle.textContent = "Login WhatsApp";
+                    qrDesc.textContent = "Scan QR Code untuk menghubungkan akun WhatsApp Anda.";
                 }
-            } catch (error) {
-                statusText.innerHTML = `<span class="text-danger">Status check failed</span>`;
-            }
+            })
+            .catch(err => {
+                console.error("Gagal cek status:", err);
+            });
         }
 
-        // Inisialisasi pertama
-        loadQr();
-        checkStatus();
-        
-        // Auto-refresh setiap 20 detik
-        const interval = setInterval(() => {
-            checkStatus();
-            if (!document.querySelector('#qr-code-container img')) {
-                loadQr();
-            }
-        }, 60000);
-
-        // Manual refresh
-        refreshBtn.addEventListener('click', () => {
-            clearInterval(interval);
-            loadQr();
-            checkStatus();
+        document.getElementById('refresh-qr').addEventListener('click', () => {
+            loadQrImage();
         });
-    });
-</script>
 
-
+        // Saat halaman dimuat
+        startSession();
+        loadQrImage();
+        checkStatus();
+        setInterval(() => {
+            loadQrImage();
+            checkStatus();
+        }, 60000); // refresh QR dan status setiap 60 detik
+    </script>
 @endsection

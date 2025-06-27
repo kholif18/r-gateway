@@ -11,7 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+            $middleware->alias([
+            'api.client' => \App\Http\Middleware\ApiClientAuth::class,
+            'rate.client' => \App\Http\Middleware\RateLimitPerClient::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

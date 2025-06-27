@@ -2,6 +2,10 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\WebhookController;
+use App\Http\Middleware\ApiTokenMiddleware;
+use App\Http\Controllers\Api\WhatsappApiController;
 
-Route::post('/whatsapp/webhook', [WebhookController::class, 'handle']);
+Route::middleware(ApiTokenMiddleware::class, 'rate.client')->group(function () {
+    Route::get('/send', [WhatsappApiController::class, 'send']);
+    Route::post('/send', [WhatsappApiController::class, 'send']);
+});

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class MessageController extends Controller
@@ -23,22 +24,29 @@ class MessageController extends Controller
 
     public function send(Request $request)
     {
-        $request->validate([
-            'number' => 'required|string',
+        $validated = $request->validate([
+            'number'  => 'required|string',
             'message' => 'required|string',
         ]);
 
-        try {
-            $response = $this->wa->sendMessage($request->number, $request->message);
+        $session = Auth::user()->username ?? 'user_1';
 
-            if (isset($response['status']) && $response['status'] === true) {
-                return back()->with('success', 'Pesan berhasil dikirim');
+        try {
+            $response = Http::withHeaders([
+                'X-API-SECRET' => env('API_SECRET'),
+            ])->post(env('WA_BACKEND_URL') . '/session/send', [
+                'session' => $session,
+                'phone'   => $validated['number'],
+                'message' => $validated['message'],
+            ]);
+
+            if ($response->successful()) {
+                return back()->with('success', 'Pesan berhasil dikirim!');
             }
 
-            return back()->with('error', $response['error'] ?? 'Gagal mengirim pesan');
+            return back()->with('error', 'Gagal mengirim pesan. Server membalas: ' . $response->body());
         } catch (\Exception $e) {
-            Log::error('Send message error: ' . $e->getMessage());
-            return back()->with('error', 'Terjadi kesalahan saat mengirim pesan');
+            return back()->with('error', 'Error saat mengirim pesan: ' . $e->getMessage());
         }
     }
 }
