@@ -2140,6 +2140,10 @@ footer {
     color: #6c757d;
 }
 
+.footer-content {
+    padding: 0 30px;
+}
+
 /* === Code Block Styling === */
 pre code {
     display: block;

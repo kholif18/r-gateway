@@ -13,6 +13,10 @@
 - ✅ Dashboard pengelolaan pengguna dan status koneksi
 - ✅ Riwayat pengiriman & laporan
 
+## 🖼️ Tampilan Dashboard
+
+Berikut contoh tampilan dashboard dari aplikasi **R Gateway**:
+![Dashboard](public/screenshots/dashboard.jpg)
 ---
 
 ## 🔧 Instalasi
