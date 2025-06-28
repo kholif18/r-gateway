@@ -31,7 +31,7 @@ php artisan key:generate
 ```
 
 ### 2. Konfigurasi `.env`
-Edit file `.env`:
+Edit dan tambahkan kode berikut di paling bawah pada file `.env`:
 
 ```env
 WA_BACKEND_URL=http://wa-backend:3000
