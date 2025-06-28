@@ -1,4 +1,4 @@
-@extends('components.app')
+@extends('layouts.app')
 
 @section('title', 'List of API Clients')
 

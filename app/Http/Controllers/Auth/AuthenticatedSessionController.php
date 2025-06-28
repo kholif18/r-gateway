@@ -37,13 +37,6 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        // Hapus session WhatsApp
-        if (auth()->check()) {
-            Http::post('http://wa-gateway:3000/session/delete', [
-                'session' => 'user_' . auth()->user()->id,
-            ]);
-        }
-
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

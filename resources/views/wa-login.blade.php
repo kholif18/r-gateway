@@ -1,4 +1,4 @@
-@extends('components.app')
+@extends('layouts.app')
 
 @section('title', 'Login')
 
@@ -58,7 +58,6 @@
         const qrContainer = document.getElementById('qr-code-container');
         const statusText = document.getElementById('status-text');
         const lastConnected = document.getElementById('last-connected');
-        const logoutForm = document.getElementById('whatsapp-logout');
 
         function startSession() {
             fetch("{{ route('whatsapp.start') }}", {
