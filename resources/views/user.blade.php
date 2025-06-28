@@ -38,10 +38,10 @@
         </div>
         
         <div class="profile-content">
-            <h3 class="section-title">Informasi Pribadi</h3>
+            <h3 class="section-title">Personal information</h3>
             <div class="form-grid">
                 <div class="form-group">
-                    <label for="name">Nama Lengkap</label>
+                    <label for="name">Full Name</label>
                     <input type="text" name="name" id="name" class="form-control" value="{{ old('name', $user->name ?? auth()->user()->name) }}">
                 </div>
                 
@@ -56,37 +56,37 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="phone">Telepon</label>
+                    <label for="phone">Phone</label>
                     <input type="text" name="phone" id="phone" class="form-control" value="{{ old('phone', $user->phone ?? auth()->user()->phone) }}">
                 </div>
                 
                 <div class="form-group form-full">
-                    <label for="address">Alamat</label>
+                    <label for="address">Address</label>
                     <textarea name="address" id="address" class="form-control" rows="3">{{ old('address', $user->address ?? auth()->user()->address) }}</textarea>
                 </div>
             </div>
             
-            <h3 class="section-title">Pengaturan Akun</h3>
+            <h3 class="section-title">Account Settings</h3>
             
             <div class="form-grid">
                 <div class="form-group">
-                    <label for="password">Password Baru</label>
-                    <input type="password" name="password" id="password" class="form-control" placeholder="Masukkan password baru">
+                    <label for="password">New Password</label>
+                    <input type="password" name="password" id="password" class="form-control" placeholder="Add new password">
                 </div>
                 
                 <div class="form-group">
-                    <label for="password_confirmation">Konfirmasi Password</label>
-                    <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" placeholder="Konfirmasi password baru">
+                    <label for="password_confirmation">Password Confirmation</label>
+                    <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" placeholder="Retype password">
                 </div>
             </div>
             
             <div>
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i>
-                    Simpan Perubahan
+                    Save change
                 </button>
                 <a href="{{ url()->previous() }}" class="btn btn-outline">
-                    <i class="fas fa-times"></i> Batal
+                    <i class="fas fa-times"></i> Cancel
                 </a>
             </div>
         </div>

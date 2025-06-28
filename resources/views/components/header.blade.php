@@ -23,7 +23,7 @@
                     @csrf
                     <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
                         <i class="fas fa-sign-out-alt"></i>
-                        <span>Keluar</span>
+                        <span>Logout</span>
                     </button>
                 </form>
             </div>

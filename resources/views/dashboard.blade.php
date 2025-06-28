@@ -9,10 +9,10 @@
             <div class="card-icon">
                 <i class="fas fa-plug"></i>
             </div>
-            <div class="card-value"  id="gateway-status-text">Memeriksa...</div>
+            <div class="card-value"  id="gateway-status-text">Checking...</div>
             <div class="card-title">Status Gateway</div>
             <div class="card-badge status-badge-unknown" id="gateway-status-badge">
-                <i class="fas  fa-spinner fa-spin"></i> Mengecek...
+                <i class="fas fa-spinner fa-spin"></i> Checking...
             </div>
         </div>
         
@@ -22,7 +22,7 @@
                 <i class="fas fa-paper-plane"></i>
             </div>
             <div class="card-value">{{ $sentToday }}</div>
-            <div class="card-title">Pesan Terkirim Hari Ini</div>
+            <div class="card-title">Message sent today</div>
             <div class="card-badge status-badge-connected">
                 <i class="fas fa-arrow-up"></i> {{ $sentTodayGrowth }}%
             </div>
@@ -34,9 +34,9 @@
                 <i class="fas fa-user-check"></i>
             </div>
             <div class="card-value">{{ $successRate }}%</div>
-            <div class="card-title">Tingkat Keberhasilan</div>
+            <div class="card-title">Success rate</div>
             <div class="card-badge status-badge-connected">
-                <i class="fas fa-chart-line"></i> Stabil
+                <i class="fas fa-chart-line"></i> Stable
             </div>
         </div>
     </div>
@@ -71,7 +71,7 @@
     <!-- Last Message Card -->
     <div class="last-message-card">
         <div class="last-message-header">
-            <div class="last-message-title">Pesan Terakhir</div>
+            <div class="last-message-title">Last Message</div>
             <div class="last-message-time">{{ $lastMessage?->sent_at->format('d M Y, H:i') ?? '-' }}</div>
         </div>
         
@@ -92,48 +92,11 @@
             </div>
         </div>
         @else
-            <div class="text-center">Belum ada pesan yang dikirim.</div>
+            <div class="text-center">No messages have been sent yet.</div>
         @endif
     </div>
 
     <script>
-        // document.addEventListener("DOMContentLoaded", function () {
-        //     fetch("{{ route('dashboard.status') }}")
-        //         .then(response => response.json())
-        //         .then(data => {
-        //             const card = document.getElementById('gateway-status-card');
-        //             const text = document.getElementById('gateway-status-text');
-        //             const badge = document.getElementById('gateway-status-badge');
-
-        //             if (data.connected) {
-        //                 card.classList.remove('status-unknown', 'status-disconnected');
-        //                 card.classList.add('status-connected');
-
-        //                 badge.className = 'card-badge status-badge-connected';
-        //                 badge.innerHTML = '<i class="fas fa-check-circle"></i> Aktif';
-        //                 text.textContent = 'Terhubung';
-        //             } else {
-        //                 card.classList.remove('status-unknown', 'status-connected');
-        //                 card.classList.add('status-disconnected');
-
-        //                 badge.className = 'card-badge status-badge-disconnected';
-        //                 badge.innerHTML = '<i class="fas fa-exclamation-circle"></i> Tidak Aktif';
-        //                 text.textContent = 'Terputus';
-        //             }
-        //         })
-        //         .catch(error => {
-        //             console.error('Gagal memuat status gateway:', error);
-        //             const card = document.getElementById('gateway-status-card');
-        //             const text = document.getElementById('gateway-status-text');
-        //             const badge = document.getElementById('gateway-status-badge');
-
-        //             card.classList.remove('status-connected');
-        //             card.classList.add('status-disconnected');
-        //             badge.className = 'card-badge status-badge-disconnected';
-        //             badge.innerHTML = '<i class="fas fa-times-circle"></i> Error';
-        //             text.textContent = 'Terputus';
-        //         });
-        // });
         document.addEventListener("DOMContentLoaded", function () {
             fetch("{{ route('dashboard.status') }}")
                 .then(response => response.json())
@@ -147,19 +110,19 @@
                         card.classList.add('status-connected');
 
                         badge.className = 'card-badge status-badge-connected';
-                        badge.innerHTML = '<i class="fas fa-check-circle"></i> Aktif';
-                        text.textContent = 'Terhubung';
+                        badge.innerHTML = '<i class="fas fa-check-circle"></i> Active';
+                        text.textContent = 'Connected';
                     } else {
                         card.classList.remove('status-unknown', 'status-connected');
                         card.classList.add('status-disconnected');
 
                         badge.className = 'card-badge status-badge-disconnected';
-                        badge.innerHTML = '<i class="fas fa-exclamation-circle"></i> Tidak Aktif';
-                        text.textContent = 'Terputus';
+                        badge.innerHTML = '<i class="fas fa-exclamation-circle"></i> Not active';
+                        text.textContent = 'Disconnected';
                     }
                 })
                 .catch(error => {
-                    console.error('Gagal memuat status gateway:', error);
+                    console.error('Failed to load gateway status:', error);
                     const card = document.getElementById('gateway-status-card');
                     const text = document.getElementById('gateway-status-text');
                     const badge = document.getElementById('gateway-status-badge');
@@ -168,7 +131,7 @@
                     card.classList.add('status-disconnected');
                     badge.className = 'card-badge status-badge-disconnected';
                     badge.innerHTML = '<i class="fas fa-times-circle"></i> Error';
-                    text.textContent = 'Terputus';
+                    text.textContent = 'Disconnected';
                 });
         });
     </script>
