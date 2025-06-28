@@ -23,7 +23,7 @@ Berikut contoh tampilan dashboard dari aplikasi **R Gateway**:
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/username/r-gateway.git
+git clone https://github.com/kholif18/r-gateway.git
 cd r-gateway
 composer install
 cp .env.example .env
@@ -49,6 +49,11 @@ php artisan serve
 ```
 
 Pastikan backend WhatsApp (`wa-backend`) juga berjalan di port yang sesuai.
+Jika wa-backend berjalan di host, isikan alamat ip wa-beckend tersebut
+Contoh:
+http://wa-backend:3000 -> misal di docker
+http://localhost:3000 -> host
+http://127.0.0.1:3000
 
 ---
 
