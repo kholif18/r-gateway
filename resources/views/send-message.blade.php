@@ -36,6 +36,12 @@
                             </button>
                         </div>
                     </div>
+                    <div class="form-section">
+                        <div class="form-group">
+                            <h4>Informasi</h4>
+                            <p>Masukkan nomor WhatsApp menggunakan kode negara. Contoh: untuk nomor Indonesia, gunakan awalan <strong>62</strong> (bukan 0) tanpa tanda kurung atau spasi. Contoh: <code>6281234567890</code>.</p>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>

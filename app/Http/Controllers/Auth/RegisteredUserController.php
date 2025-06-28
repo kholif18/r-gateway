@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -46,10 +47,15 @@ class RegisteredUserController extends Controller
         ]);
 
         // Buat session WhatsApp otomatis
-        Http::post('http://wa-gateway:3000/session/start', [
-            'session' => 'user_' . $user->id,
-            'multiDevice' => true
-        ]);
+        try {
+            Http::post(env('WA_BACKEND_URL') . '/session/start', [
+                'session' => 'user_' . $user->id,
+                'multiDevice' => true
+            ]);
+        } catch (\Exception $e) {
+            Log::warning('Gagal memulai sesi WA: ' . $e->getMessage());
+            // Optional: simpan informasi ini ke notifikasi atau database
+        }
 
         event(new Registered($user));
 

@@ -31,7 +31,6 @@ class WhatsappLoginController extends Controller
 
         return view('wa-login', [
             'status' => $status,
-            'session' => $session,
         ]);
     }
 
@@ -40,9 +39,26 @@ class WhatsappLoginController extends Controller
         if (!Auth::check() || !Auth::user()->username) {
             return response()->json(['error' => 'Unauthorized or username missing'], 403);
         }
+
         $session = Auth::user()->username;
 
+        // ✅ 1. Cek status terlebih dahulu
+        $statusResponse = Http::withHeaders([
+            'X-API-SECRET' => $this->apiSecret,
+        ])->get("{$this->backendUrl}/session/status?session={$session}");
 
+        if ($statusResponse->ok()) {
+            $status = strtolower($statusResponse->json('status'));
+
+            if ($status === 'connected' || $status === 'qr') {
+                return response()->json([
+                    'message' => 'Session already active or pending QR',
+                    'status' => $status,
+                ], 200);
+            }
+        }
+
+        // ✅ 2. Jika belum aktif, baru start
         $response = Http::withHeaders([
             'X-API-SECRET' => $this->apiSecret,
         ])->post("{$this->backendUrl}/session/start", [
@@ -57,9 +73,21 @@ class WhatsappLoginController extends Controller
         if (!Auth::check() || !Auth::user()->username) {
             return response()->json(['error' => 'Unauthorized or username missing'], 403);
         }
+
         $session = Auth::user()->username;
 
+        // ✅ Cek status dulu
+        $statusResponse = Http::withHeaders([
+            'X-API-SECRET' => $this->apiSecret,
+        ])->get("{$this->backendUrl}/session/status?session={$session}");
 
+        if ($statusResponse->ok()) {
+            $status = strtolower($statusResponse->json('status'));
+            if ($status === 'connected') {
+                return response()->noContent(); // 204
+            }
+        }
+        
         $response = Http::withHeaders([
             'X-API-SECRET' => $this->apiSecret,
         ])->get("{$this->backendUrl}/session/qr.png?session={$session}");

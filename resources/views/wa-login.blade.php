@@ -40,7 +40,6 @@
             </div>
             <div class="card-body">
                 <p>Status: <span id="status-text" style="color: var(--primary); font-weight: bold;">Memeriksa status...</span></p>
-                <p>Session: <strong>{{ $session }}</strong></p>
                 <p id="last-connected" style="margin-top: 10px;"></p>
             </div>
             <!-- Form Logout WhatsApp -->
@@ -73,19 +72,47 @@
         }
 
         function loadQrImage() {
-            fetch("{{ route('whatsapp.qr-image') }}?t=" + new Date().getTime())
-                .then(res => {
-                    if (!res.ok) throw new Error('QR tidak tersedia');
-                    return res.blob();
-                })
-                .then(blob => {
-                    const url = URL.createObjectURL(blob);
-                    qrContainer.innerHTML = `<img src="${url}" width="300" />`;
+            fetch("{{ route('dashboard.status') }}")
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'connected') {
+                        qrContainer.innerHTML = `<p class="text-success">Anda sudah terhubung.</p>`;
+                    } else if (data.status === 'qr') {
+                        fetch("{{ route('whatsapp.qr-image') }}?t=" + new Date().getTime())
+                            .then(res => {
+                                if (!res.ok) throw new Error('QR tidak tersedia');
+                                return res.blob();
+                            })
+                            .then(blob => {
+                                const url = URL.createObjectURL(blob);
+                                qrContainer.innerHTML = `<img src="${url}" width="300" />`;
+                            })
+                            .catch(err => {
+                                qrContainer.innerHTML = `<p class="text-danger">Gagal memuat QR</p>`;
+                            });
+                    } else {
+                        qrContainer.innerHTML = `<p class="text-muted">Sesi belum dimulai.</p>`;
+                    }
                 })
                 .catch(err => {
-                    qrContainer.innerHTML = `<p style="color: red;">QR tidak tersedia</p>`;
+                    qrContainer.innerHTML = `<p class="text-danger">Gagal memuat status sesi</p>`;
                 });
         }
+
+        // function loadQrImage() {
+        //     fetch("{{ route('whatsapp.qr-image') }}?t=" + new Date().getTime())
+        //         .then(res => {
+        //             if (!res.ok) throw new Error('QR tidak tersedia');
+        //             return res.blob();
+        //         })
+        //         .then(blob => {
+        //             const url = URL.createObjectURL(blob);
+        //             qrContainer.innerHTML = `<img src="${url}" width="300" />`;
+        //         })
+        //         .catch(err => {
+        //             qrContainer.innerHTML = `<p style="color: red;">QR tidak tersedia</p>`;
+        //         });
+        // }
 
         function checkStatus() {
             fetch("{{ route('whatsapp.status') }}")

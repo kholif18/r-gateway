@@ -2,8 +2,8 @@
     <div class="sidebar-header">
         <div class="logo">
             <a href="{{ url('/') }}">
-                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xNyA0aDNhMiAyIDAgMCAxIDIgMnYxNGEyIDIgMCAwIDEtMiAySDRhMiAyIDAgMCAxLTItMlY2YTIgMiAwIDAgMSAyLTJoNyI+PC9wYXRoPjxwYXRoIGQ9Ik0xNyAxN1Y0YTIgMiAwIDAgMC0yLTJIOGEyIDIgMCAwIDAtMiAydjEzYTIgMiAwIDAgMCAyIDJoN2EyIDIgMCAwIDAgMi0yeiI+PC9wYXRoPjwvc3ZnPg==" alt="Logo">
-                <h2>WA Gateway</h2>
+                <img src="{{ asset('assets/img/logo-white.png') }}" alt="Logo">
+                <h2>r gateway</h2>
             </a>
         </div>
     </div>
@@ -40,6 +40,11 @@
             <i class="fas fa-chart-line"></i>
             <span>Report</span>
         </a>
+
+        <a href="{{ route('logs.index') }}" class="menu-item  {{ Route::is('logs.index') ? 'active' : '' }}">
+            <i class="fas fa-file-lines"></i>
+            <span>Logs</span>
+        </a>
         
         <div class="divider"></div>
 
@@ -53,5 +58,9 @@
             <span>Settings</span>
         </a>
 
+        <a href="{{ route('help.index') }}" class="menu-item  {{ Request::is('help.index') ? 'active' : '' }}">
+            <i class="fas fa-question-circle"></i>
+            <span>Help</span>
+        </a>
     </div>
 </div>

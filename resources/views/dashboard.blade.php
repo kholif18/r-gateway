@@ -23,8 +23,10 @@
             </div>
             <div class="card-value">{{ $sentToday }}</div>
             <div class="card-title">Message sent today</div>
-            <div class="card-badge status-badge-connected">
-                <i class="fas fa-arrow-up"></i> {{ $sentTodayGrowth }}%
+            <div class="card-badge 
+                {{ $growthDirection === 'up' ? 'status-badge-connected' : 
+                ($growthDirection === 'down' ? 'status-badge-disconnected' : 'status-badge-unknown') }}">
+                <i class="fas fa-arrow-{{ $growthDirection }}"></i> {{ $sentTodayGrowth }}%
             </div>
         </div>
         
@@ -35,8 +37,8 @@
             </div>
             <div class="card-value">{{ $successRate }}%</div>
             <div class="card-title">Success rate</div>
-            <div class="card-badge status-badge-connected">
-                <i class="fas fa-chart-line"></i> Stable
+            <div class="card-badge {{ $successBadge }}">
+                <i class="fas {{ $successIcon }}"></i> {{ $successStatus }}
             </div>
         </div>
     </div>
@@ -98,41 +100,51 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            fetch("{{ route('dashboard.status') }}")
-                .then(response => response.json())
-                .then(data => {
-                    const card = document.getElementById('gateway-status-card');
-                    const text = document.getElementById('gateway-status-text');
-                    const badge = document.getElementById('gateway-status-badge');
+            const card = document.getElementById('gateway-status-card');
+            const text = document.getElementById('gateway-status-text');
+            const badge = document.getElementById('gateway-status-badge');
 
-                    if (data.connected) {
-                        card.classList.remove('status-unknown', 'status-disconnected');
-                        card.classList.add('status-connected');
+            function updateStatusUI(data) {
+                if (data.connected) {
+                    card.classList.remove('status-unknown', 'status-disconnected');
+                    card.classList.add('status-connected');
 
-                        badge.className = 'card-badge status-badge-connected';
-                        badge.innerHTML = '<i class="fas fa-check-circle"></i> Active';
-                        text.textContent = 'Connected';
-                    } else {
-                        card.classList.remove('status-unknown', 'status-connected');
-                        card.classList.add('status-disconnected');
-
-                        badge.className = 'card-badge status-badge-disconnected';
-                        badge.innerHTML = '<i class="fas fa-exclamation-circle"></i> Not active';
-                        text.textContent = 'Disconnected';
-                    }
-                })
-                .catch(error => {
-                    console.error('Failed to load gateway status:', error);
-                    const card = document.getElementById('gateway-status-card');
-                    const text = document.getElementById('gateway-status-text');
-                    const badge = document.getElementById('gateway-status-badge');
-
-                    card.classList.remove('status-connected');
+                    badge.className = 'card-badge status-badge-connected';
+                    badge.innerHTML = '<i class="fas fa-check-circle"></i> Active';
+                    text.textContent = 'Connected';
+                } else {
+                    card.classList.remove('status-unknown', 'status-connected');
                     card.classList.add('status-disconnected');
+
                     badge.className = 'card-badge status-badge-disconnected';
-                    badge.innerHTML = '<i class="fas fa-times-circle"></i> Error';
+                    badge.innerHTML = '<i class="fas fa-exclamation-circle"></i> Not active';
                     text.textContent = 'Disconnected';
-                });
+                }
+            }
+
+            function showError() {
+                card.classList.remove('status-connected', 'status-unknown');
+                card.classList.add('status-disconnected');
+                badge.className = 'card-badge status-badge-disconnected';
+                badge.innerHTML = '<i class="fas fa-times-circle"></i> Error';
+                text.textContent = 'Disconnected';
+            }
+
+            function fetchGatewayStatus() {
+                fetch("{{ route('dashboard.status') }}")
+                    .then(response => response.json())
+                    .then(data => updateStatusUI(data))
+                    .catch(error => {
+                        console.error('Failed to load gateway status:', error);
+                        showError();
+                    });
+            }
+
+            // Fetch saat pertama kali halaman dimuat
+            fetchGatewayStatus();
+
+            // Set interval refresh setiap 30 detik
+            setInterval(fetchGatewayStatus, 30000);
         });
     </script>
 @endsection

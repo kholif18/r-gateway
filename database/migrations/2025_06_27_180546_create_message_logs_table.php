@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('session_name'); // Nama session WhatsApp
             $table->string('phone'); // Nomor tujuan
             $table->text('message'); // Isi pesan
-            $table->enum('status', ['success', 'failed', 'pending'])->default('pending');
+            $table->string('status')->default('pending');
             $table->text('response')->nullable(); // Response dari backend
             $table->timestamp('sent_at')->nullable(); // Waktu pengiriman (boleh null saat pending)
             $table->timestamps();

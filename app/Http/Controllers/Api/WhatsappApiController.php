@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Setting;
 use App\Models\ApiClient;
 use App\Models\MessageLog;
 use Illuminate\Http\Request;
@@ -48,13 +49,20 @@ class WhatsappApiController extends Controller
         }
 
         try {
+            $timeout = setting("{$session}_timeout", 30);
+            $maxRetry = setting("{$session}_max-retry", 3);
+            $retryInterval = setting("{$session}_retry-interval", 10);
+
             $response = Http::withHeaders([
                 'X-API-SECRET' => env('API_SECRET'),
-            ])->post(env('WA_BACKEND_URL') . '/session/send', [
-                    'session' => $session,
-                    'phone'   => $to,
-                    'message' => $msg,
-                ]);
+            ])
+            ->timeout((int) $timeout)
+            ->retry((int) $maxRetry, (int) $retryInterval * 1000) // dalam milidetik
+            ->post(env('WA_BACKEND_URL') . '/session/send', [
+                'session' => $session,
+                'phone'   => $to,
+                'message' => $msg,
+            ]);
 
             MessageLog::create([
                 'client_name'   => $clientName,

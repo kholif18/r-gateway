@@ -49,6 +49,25 @@
                                 <div class="form-hint">Maximum number of messages that can be queued</div>
                             </div>
                         </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="rate_limit_limit">Rate Limit (max requests)</label>
+                                <input type="number" id="rate_limit_limit" name="rate_limit_limit" class="form-control"
+                                    value="{{ old('rate_limit_limit', $settings['rate_limit_limit'] ?? 5) }}"
+                                    min="1" max="100">
+                                <div class="form-hint">The maximum number of API requests allowed in a given period.</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="rate_limit_decay">Rate Limit Decay (seconds)</label>
+                                <input type="number" id="rate_limit_decay" name="rate_limit_decay" class="form-control"
+                                    value="{{ old('rate_limit_decay', $settings['rate_limit_decay'] ?? 60) }}"
+                                    min="10" max="3600">
+                                <div class="form-hint">Time period (in seconds) to reset the number of requests</div>
+                            </div>
+                        </div>
+
                     </div>
                     
                     <!-- Save Settings -->
@@ -65,21 +84,53 @@
         </div>
     </div>
 
+    <!-- Success Toast -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="feedbackToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div id="toastHeader" class="toast-header">
+                <strong class="me-auto"  id="toastTitle"></strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastBody"></div>
+        </div>
+    </div>
+
     <script>
-        // Save settings
-        document.getElementById('save-settings').addEventListener('click', function() {
-            const formData = new FormData(document.querySelector('form')); // pastikan semua input ada dalam <form>
+        document.getElementById('save-settings').addEventListener('click', function(e) {
+            e.preventDefault(); // Tambahkan ini untuk cegah reload
+
+            const formData = new FormData(document.getElementById('settings-form'));
+
             fetch('/settings/save', {
                 method: 'POST',
                 body: formData,
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 }
-            }).then(res => res.json()).then(data => {
-                alert('Settings saved successfully!');
+            })
+            .then(res => res.json())
+            .then(data => {
+                showToast('Success', 'Settings saved successfully!', 'success');
+            })
+            .catch(error => {
+                showToast('Error', 'Failed to save settings: ' + error.message, 'error');
             });
         });
 
+        function showToast(title, message, type = 'success') {
+            const toastEl = document.getElementById('feedbackToast');
+            const toast = new bootstrap.Toast(toastEl);
+
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastBody').innerText = message;
+
+            const header = document.getElementById('toastHeader');
+            header.className = 'toast-header';
+            if (type === 'success') header.classList.add('bg-success', 'text-white');
+            else if (type === 'error') header.classList.add('bg-danger', 'text-white');
+
+            toast.show();
+        }
         //Reset Settings
         document.getElementById('reset-settings').addEventListener('click', function (event) {
             event.preventDefault(); // Mencegah form submit
@@ -97,11 +148,11 @@
                     return response.json();
                 })
                 .then(data => {
-                    alert('Settings successfully reset!');
-                    location.reload(); // Reload halaman
+                    showToast('Success', 'Settings successfully reset!', 'success');
+                    setTimeout(() => location.reload(), 1500); // Reload setelah toast tampil
                 })
                 .catch(error => {
-                    alert('Error: ' + error.message);
+                    showToast('Error', 'Reset failed: ' + error.message, 'error');
                     console.error('Reset error:', error);
                 });
             }

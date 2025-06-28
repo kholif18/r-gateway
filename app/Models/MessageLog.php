@@ -12,7 +12,7 @@ class MessageLog extends Model
         'phone',
         'message',
         'status',
-        'backend_response',
+        'response',
         'sent_at',
     ];
 

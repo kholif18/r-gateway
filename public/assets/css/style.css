@@ -98,6 +98,22 @@ body {
     color: #fff;
 }
 
+.badge-primary {
+    background-color: var(--primary); /* Hijau */
+}
+
+.badge-secondary {
+    background-color: var(--secondary); /* Hijau */
+}
+
+.badge-dark {
+    background-color: var(--dark); /* Hijau */
+}
+
+.badge-ligjt {
+    background-color: var(--light); /* Hijau */
+}
+
 .badge-success {
     background-color: #28a745; /* Hijau */
 }
@@ -869,6 +885,21 @@ body {
   }
 }
 
+@keyframes slideOutUp {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+.toast.hide {
+    animation: slideOutUp 0.5s forwards;
+}
+
 /* Form Styles */
 .form-container {
     display: grid;
@@ -1463,6 +1494,8 @@ a:hover {
 }
 
 .page-btn {
+    color: gray;
+    text-decoration: none;
     width: 36px;
     height: 36px;
     border-radius: 50%;
@@ -2037,6 +2070,100 @@ input:checked + .slider:before {
     display: block;
 }
 
+.log-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+.log-table th, .log-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.log-table th {
+    background-color: #f2f2f2;
+    position: sticky;
+    top: 0;
+}
+
+.log-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.log-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.status-success {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.status-failed {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.message-content {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.timestamp {
+    white-space: nowrap;
+}
+
+footer {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    font-size: 0.9rem;
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+/* === Code Block Styling === */
+pre code {
+    display: block;
+    background-color: #1e1e1e;
+    color: #ffffff;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    font-family: "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-x: auto;
+}
+
+/* Inline code */
+code {
+    background-color: #f1f1f1;
+    color: #c7254e;
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-size: 0.875em;
+    font-family: "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+}
 
 /* Responsive */
 @media (max-width: 992px) {

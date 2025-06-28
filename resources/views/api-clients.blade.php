@@ -65,7 +65,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center">There is no client API yet</td>
+                            <td colspan="5" class="text-center">There is no client API yet</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -85,7 +85,7 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="clientName" class="form-label">Application Name</label>
-                            <input type="text" class="form-control" id="clientName" name="client_name" placeholder="Enter application name" required>
+                            <input type="text" class="form-control" id="clientName" name="client_name" placeholder="Enter application name" required autofocus>
                             <div class="form-text">Example: Mobile App, Web Dashboard, dll.</div>
                         </div>
                     </div>
@@ -100,25 +100,51 @@
 
     <!-- Success Toast -->
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-        <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header bg-success text-white">
-                <strong class="me-auto"><i class="fas fa-check-circle me-2"></i> Success</strong>
+        <div id="feedbackToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div id="toastHeader" class="toast-header">
+                <strong class="me-auto"  id="toastTitle"></strong>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
-            <div class="toast-body">
-                New client successfully added!
-            </div>
+            <div class="toast-body" id="toastBody"></div>
         </div>
     </div>
 
     <script>
+        // Autofocus modal
+        document.addEventListener('DOMContentLoaded', function () {
+            const addClientModal = document.getElementById('addClientModal');
+            const clientNameInput = document.getElementById('clientName');
+
+            addClientModal.addEventListener('shown.bs.modal', function () {
+                clientNameInput.focus();
+            });
+        });
         // Inisialisasi tooltip
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
         const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
         
-        // Inisialisasi toast
-        const toastEl = document.getElementById('successToast');
-        const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+        document.addEventListener('DOMContentLoaded', function () {
+            @if (session('success'))
+                const toastEl = document.getElementById('feedbackToast');
+                const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+
+                // Set konten dan warna header
+                document.getElementById('toastTitle').textContent = 'Sukses';
+                document.getElementById('toastHeader').classList.add('bg-success', 'text-white');
+                document.getElementById('toastBody').textContent = @json(session('success'));
+
+                toast.show();
+            @elseif (session('error'))
+                const toastEl = document.getElementById('feedbackToast');
+                const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+
+                document.getElementById('toastTitle').textContent = 'Gagal';
+                document.getElementById('toastHeader').classList.add('bg-danger', 'text-white');
+                document.getElementById('toastBody').textContent = @json(session('error'));
+
+                toast.show();
+            @endif
+        });
         
         document.addEventListener('DOMContentLoaded', function () {
             const copyButtons = document.querySelectorAll('.copy-token');

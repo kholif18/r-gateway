@@ -3,7 +3,6 @@
 @section('title', 'History')
 
 @section('content')
-    @php use Illuminate\Support\Str; @endphp
     <!-- History Page -->
     <div class="card">
         <div class="card-header">
@@ -29,7 +28,7 @@
                         <label>Status</label>
                         <select name="status" class="filter-control">
                             <option value="all">All Status</option>
-                            @foreach(['success', 'pending', 'failed'] as $status)
+                            @foreach(['success', 'pending', 'failed', 'error', 'rate_limited'] as $status)
                                 <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>
                                     {{ ucfirst($status) }}
                                 </option>
@@ -71,10 +70,13 @@
                                             'success' => 'badge-success',
                                             'failed' => 'badge-danger',
                                             'pending' => 'badge-warning',
-                                            default => '',
+                                            'rate_limited' => 'badge-danger',
+                                            'error' => 'badge-secondary',
+                                            'timeout' => 'badge-dark',
+                                            default => 'badge-light',
                                         };
                                     @endphp
-                                    <span class="badge {{ $statusClass }}">{{ ucfirst($history->status) }}</span>
+                                    <span class="badge {{ $statusClass }}">{{ ucfirst(str_replace('_', ' ', $history->status)) }}</span>
                                 </td>
                             </tr>
                         @empty

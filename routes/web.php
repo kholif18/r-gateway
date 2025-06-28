@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HelpController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\HistoryController;
@@ -45,8 +46,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/clients/{client}/toggle', [ApiClientController::class, 'toggle'])->name('clients.toggle');
     Route::patch('/clients/{client}/regenerate', [ApiClientController::class, 'regenerate'])->name('clients.regenerate');
 
-    Route::get('/logs', [MessageLogController::class, 'index']);
+    Route::get('/logs', [MessageLogController::class, 'index'])->name('logs.index');
+    Route::get('/logs/export', [MessageLogController::class, 'export'])->name('logs.export');
 
+    Route::prefix('help')->name('help.')->group(function () {
+        Route::get('/', [HelpController::class, 'index'])->name('index');
+        Route::get('/api', [HelpController::class, 'api'])->name('api');
+    });
 });
 
 

@@ -4,10 +4,8 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\MessageLog;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
+use App\Helpers\WhatsappHelper\WhatsappHelper;
 
 class DashboardController extends Controller
 {
@@ -21,49 +19,58 @@ class DashboardController extends Controller
         $yesterday = Carbon::yesterday();
         $sentYesterday = MessageLog::whereDate('sent_at', $yesterday)->count();
 
-        // Hitung growth (jika kemarin = 0, maka default 100%)
-        $sentTodayGrowth = $sentYesterday > 0
-            ? round((($sentToday - $sentYesterday) / $sentYesterday) * 100)
-            : ($sentToday > 0 ? 100 : 0);
+        // ✅ 3. Hitung growth (%)
+        if ($sentYesterday > 0) {
+            $sentTodayGrowth = round((($sentToday - $sentYesterday) / $sentYesterday) * 100);
+        } else {
+            $sentTodayGrowth = $sentToday > 0 ? 100 : 0;
+        }
 
-        // ✅ 3. Tingkat keberhasilan (% pesan sukses)
+        // ✅ 4. Tentukan arah panah growth
+        $growthDirection = $sentToday > $sentYesterday ? 'up'
+                        : ($sentToday < $sentYesterday ? 'down' : 'right'); // right = stagnan
+
+        // ✅ 5. Tingkat keberhasilan (% pesan sukses)
         $totalMessages = MessageLog::count();
         $successCount = MessageLog::where('status', 'success')->count();
         $successRate = $totalMessages > 0 ? round(($successCount / $totalMessages) * 100) : 0;
 
-        // ✅ 4. Ambil pesan terakhir
+        if ($successRate >= 90) {
+            $successStatus = 'Stable';
+            $successBadge = 'status-badge-connected';       // hijau
+            $successIcon = 'fa-chart-line';
+        } elseif ($successRate >= 70) {
+            $successStatus = 'Warning';
+            $successBadge = 'status-badge-warning';         // kuning
+            $successIcon = 'fa-exclamation-triangle';
+        } else {
+            $successStatus = 'Critical';
+            $successBadge = 'status-badge-disconnected';    // merah
+            $successIcon = 'fa-times-circle';
+        }
+
+        // ✅ 6. Ambil pesan terakhir
         $lastMessage = MessageLog::latest('sent_at')->first();
 
         return view('dashboard', compact(
             'sentToday',
             'sentTodayGrowth',
+            'growthDirection',
             'successRate',
-            'lastMessage'
+            'lastMessage',
+            'successStatus',
+            'successBadge',
+            'successIcon'
         ));
     }
 
     public function status()
     {
-        if (!Auth::check() || !Auth::user()->username) {
-            return response()->json(['connected' => false, 'error' => 'Unauthorized or username missing'], 403);
-        }
-
         $session = Auth::user()->username;
+        $status = WhatsappHelper::checkGatewayStatus($session);
 
-        try {
-            $response = Http::withHeaders([
-                'X-API-SECRET' => env('API_SECRET'),
-            ])->get(env('WA_BACKEND_URL') . "/session/status?session={$session}");
+        return response()->json($status);
 
-            Log::debug('Dashboard Session status response:', $response->json());
-
-            return response()->json([
-                'connected' => $response->ok() && $response->json('status') === 'CONNECTED'
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Gagal cek status gateway: ' . $e->getMessage());
-            return response()->json(['connected' => false, 'error' => $e->getMessage()], 500);
-        }
     }
 
 }
