@@ -6,15 +6,24 @@ use App\Models\User;
 use Illuminate\View\View;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Helpers\WhatsappHelper;
+use App\Services\WhatsAppService;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Password;
 
 class PasswordResetLinkController extends Controller
 {
+    protected $wa;
+
+    public function __construct()
+    {
+        $this->wa = new WhatsAppService();
+    }
+
     /**
-     * Display the password reset link request view.
+     * Tampilkan halaman form reset password.
      */
     public function create(): View
     {
@@ -22,15 +31,13 @@ class PasswordResetLinkController extends Controller
     }
 
     /**
-     * Handle an incoming password reset link request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
+     * Proses permintaan reset password (via email atau WhatsApp).
      */
     public function store(Request $request): RedirectResponse
     {
         $input = $request->input('email_or_wa');
 
-        // 📍 1. Jika input adalah email
+        // ✅ Jika Email
         if (filter_var($input, FILTER_VALIDATE_EMAIL)) {
             $request->merge(['email' => $input]);
             $request->validate(['email' => ['required', 'email']]);
@@ -42,56 +49,43 @@ class PasswordResetLinkController extends Controller
                 : back()->withInput()->withErrors(['email_or_wa' => __($status)]);
         }
 
-        // 📍 2. Jika input adalah nomor WhatsApp
-        if (preg_match('/^(\+62|08)[0-9]{9,15}$/', $input)) {
-            $phone = $this->normalizeWhatsappNumber($input);
-            $user = User::where('phone', $phone)->first();
+        // ✅ Coba normalisasi & cari user via WhatsApp
+        $phone = WhatsappHelper::normalizePhoneNumber($input);
+        $user = User::where('phone', $phone)->first();
 
-            if (!$user) {
-                return back()->withErrors(['email_or_wa' => 'Nomor WhatsApp tidak terdaftar.']);
-            }
+        if ($user) {
+            $session = $user->username;
 
-            $session = 'pelikik' . $phone;
+            // 🔍 Cek status via helper
+            $statusData = WhatsappHelper::checkGatewayStatus($session);
 
-            // ✅ Cek status session WA di backend
-            $sessionStatus = Http::withHeaders([
-                'X-API-SECRET' => env('API_SECRET'),
-            ])->get(env('WA_BACKEND_URL') . "/session/status/$session");
+            Log::debug("OTP Reset: Status session", [
+                'session' => $session,
+                'statusData' => $statusData,
+            ]);
 
-            if (!$sessionStatus->successful() || !$sessionStatus->json('connected')) {
-                // ❌ Belum login WhatsApp
+            if (!$statusData['connected']) {
                 return back()->withErrors([
                     'email_or_wa' => 'Nomor WhatsApp belum login ke sistem. Silakan scan QR terlebih dahulu atau gunakan opsi reset via email.'
                 ]);
             }
 
-            // ✅ Session aktif, lanjut kirim OTP
+            // ✅ Kirim OTP
             $otp = rand(100000, 999999);
             $user->otp = $otp;
             $user->otp_expires_at = now()->addMinutes(3);
             $user->save();
 
-            $response = Http::withHeaders([
-                'X-API-SECRET' => env('API_SECRET'),
-            ])->post(env('WA_BACKEND_URL') . '/session/send', [
-                'session' => $session,
-                'phone' => $phone,
-                'message' => "Kode OTP Anda adalah *$otp*\nBerlaku 3 menit.",
-            ]);
+            $sendStatus = $this->wa->sendMessageToSession($session, $phone, "Kode OTP Anda adalah *$otp*\nBerlaku 3 menit.");
 
-            if (!$response->successful()) {
+            if (!$sendStatus) {
                 return back()->withErrors(['email_or_wa' => 'Gagal mengirim OTP ke WhatsApp.']);
             }
 
             return redirect()->route('password.otp')->with('phone', $phone);
         }
 
+        // ❌ Gagal validasi semua
         return back()->withErrors(['email_or_wa' => 'Masukkan email atau nomor WhatsApp yang valid.']);
-    }
-
-    protected function normalizeWhatsappNumber($number)
-    {
-        $number = preg_replace('/[^0-9]/', '', $number); // hanya angka
-        return Str::startsWith($number, '08') ? '62' . substr($number, 1) : $number;
     }
 }

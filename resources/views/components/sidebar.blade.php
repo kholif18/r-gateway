@@ -25,12 +25,6 @@
 
         <div class="divider"></div>
         
-
-        <a href="{{ route('user') }}" class="menu-item  {{ Request::is('user') ? 'active' : '' }}">
-            <i class="fas fa-user"></i>
-            <span>My Profile</span>
-        </a>
-
         <a href="{{ route('history') }}" class="menu-item  {{ Request::is('history') ? 'active' : '' }}">
             <i class="fas fa-history"></i>
             <span>History</span>
@@ -48,6 +42,11 @@
         
         <div class="divider"></div>
 
+        <a href="{{ route('user') }}" class="menu-item  {{ Request::is('user') ? 'active' : '' }}">
+            <i class="fas fa-user"></i>
+            <span>My Profile</span>
+        </a>
+
         <a href="{{ route('clients.index') }}" class="menu-item  {{ Route::is('clients.index') ? 'active' : '' }}">
             <i class="fas fa-key"></i>
             <span>API Client</span>
@@ -58,7 +57,7 @@
             <span>Settings</span>
         </a>
 
-        <a href="{{ route('help.index') }}" class="menu-item  {{ Request::is('help.index') ? 'active' : '' }}">
+        <a href="{{ route('help.index') }}" class="menu-item  {{ Route::is('help.index*') ? 'active' : '' }}">
             <i class="fas fa-question-circle"></i>
             <span>Help</span>
         </a>

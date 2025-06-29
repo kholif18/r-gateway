@@ -92,4 +92,27 @@ class WhatsAppService
             'session' => $session,
         ]);
     }
+
+    public function isConnected(string $session): bool
+    {
+        try {
+            $response = $this->checkSessionStatus($session);
+            return isset($response['connected']) && $response['connected'] === true;
+        } catch (\Exception $e) {
+            Log::error("Check connection failed for $session: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function sendMessage(string $session, string $phone, string $message): bool
+    {
+        try {
+            $response = $this->sendMessageToSession($session, $phone, $message);
+            return $response->successful();
+        } catch (\Exception $e) {
+            Log::error("Failed to send OTP message: " . $e->getMessage());
+            return false;
+        }
+    }
+
 }

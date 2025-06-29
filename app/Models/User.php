@@ -26,6 +26,8 @@ class User extends Authenticatable
         'address',
         'password',
         'avatar',
+        'otp',
+        'otp_expires_at',
     ];
 
     public function getAvatarUrlAttribute()
