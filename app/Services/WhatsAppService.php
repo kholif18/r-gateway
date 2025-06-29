@@ -19,7 +19,7 @@ class WhatsAppService
     public function startSession(string $session)
     {
         return Http::timeout(30)
-            ->withHeaders(['apikey' => $this->apiKey])
+            ->withHeaders(['X-API-SECRET' => $this->apiKey])
             ->post("{$this->baseUrl}/session/start", [
                 'session' => $session,
             ]);

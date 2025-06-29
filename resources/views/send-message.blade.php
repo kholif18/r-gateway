@@ -22,7 +22,7 @@
                             <label for="number">WhatsApp Number</label>
                             <div class="search-box">
                                 <i class="fas fa-phone"></i>
-                                <input type="text" id="number" name="number" class="form-control" placeholder="6281234567890" required>
+                                <input type="text" id="number" name="number" class="form-control" placeholder="081234567890" required>
                             </div>
                         </div>
                         <div class="form-group">
