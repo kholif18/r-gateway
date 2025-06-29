@@ -28,7 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/report', [ReportController::class, 'index'])->name('report');
 
     Route::prefix('whatsapp')->group(function () {
-        Route::get('/login', [WhatsappLoginController::class, 'index'])->name('login.whatsapp');
+        Route::get('/login', [WhatsappLoginController::class, 'index'])->name('whatsapp.login');
         Route::post('/start', [WhatsappLoginController::class, 'start'])->name('whatsapp.start');
         Route::get('/status', [WhatsappLoginController::class, 'status'])->name('whatsapp.status');
         Route::get('/qr-image', [WhatsappLoginController::class, 'getQrImage'])->name('whatsapp.qr-image');

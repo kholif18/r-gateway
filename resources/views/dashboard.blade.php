@@ -57,7 +57,7 @@
             <div class="btn-desc">Check History Send</div>
         </a>
         
-        <a href="{{ route('login.whatsapp') }}" class="action-btn" data-page="contacts">
+        <a href="{{ route('whatsapp.login') }}" class="action-btn" data-page="contacts">
             <i class="fas fa-qrcode"></i>
             <div class="btn-title">Status Device</div>
             <div class="btn-desc">Check Status Device</div>

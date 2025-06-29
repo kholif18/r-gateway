@@ -17,16 +17,20 @@
         
         <form method="POST" action="{{ route('password.email') }}">
         @csrf
-            <div class="mb-4">
+            <div>
                 <label for="email_or_wa">Email / Nomor WA</label>
                 <input id="email_or_wa" class="form-control" type="text" name="email_or_wa" placeholder="Email or username" required autofocus autocomplete="username">
-                @error('login')
+                @error('email_or_wa')
                     <span class="text-danger text-sm">{{ $message }}</span>
                 @enderror
             </div>
             
+            <div class="auth-footer mb-4">
+                <p>Jika ingin menerima kode OTP via WhatsApp, pastikan nomor tersebut sudah login di sistem kami.</p>
+            </div>
+
             <div>
-                <button type="submit" class="btn-auth">Reset Password</button>
+                <button type="submit" class="btn-auth">Kirim Link / OTP</button>
             </div>
             
             <div class="auth-footer">

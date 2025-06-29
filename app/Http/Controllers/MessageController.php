@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MessageLog;
 use Illuminate\Http\Request;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\Log;
@@ -29,7 +30,7 @@ class MessageController extends Controller
             'message' => 'required|string',
         ]);
 
-        $session = Auth::user()->username ?? 'user_1';
+        $session = Auth::user()->username;
 
         try {
             $response = Http::withHeaders([
@@ -40,12 +41,32 @@ class MessageController extends Controller
                 'message' => $validated['message'],
             ]);
 
+            MessageLog::create([
+                'client_name'   => 'Test Gateway',
+                'session_name'  => $session,
+                'phone'         => $validated['number'],
+                'message'       => $validated['message'],
+                'status'        => $response->successful() ? 'success' : 'failed',
+                'response'      => $response->body(),
+                'sent_at'       => now(),
+            ]);
+
             if ($response->successful()) {
                 return back()->with('success', 'Pesan berhasil dikirim!');
             }
 
             return back()->with('error', 'Gagal mengirim pesan. Server membalas: ' . $response->body());
         } catch (\Exception $e) {
+            MessageLog::create([
+                'client_name'   => 'Test Gateway',
+                'session_name'  => $session,
+                'phone'         => $validated['number'],
+                'message'       => $validated['message'],
+                'status'        => 'failed',
+                'response'      => $e->getMessage(),
+                'sent_at'       => now(),
+            ]);
+            
             return back()->with('error', 'Error saat mengirim pesan: ' . $e->getMessage());
         }
     }
