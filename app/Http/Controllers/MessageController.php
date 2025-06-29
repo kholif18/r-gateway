@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\MessageLog;
 use Illuminate\Http\Request;
-use App\Services\WhatsAppService;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use App\Services\WhatsAppService;
+use App\Helpers\WhatsappHelper;
 
 class MessageController extends Controller
 {
@@ -20,7 +20,13 @@ class MessageController extends Controller
 
     public function index()
     {
-        return view('send-message');
+        $session = Auth::user()->username;
+        $statusData = WhatsappHelper::checkGatewayStatus($session);
+
+        return view('send-message', [
+            'waStatus' => $statusData['connected'] ? 'Terhubung' : 'Tidak Terhubung',
+            'waConnected' => $statusData['connected'],
+        ]);
     }
 
     public function send(Request $request)
@@ -31,42 +37,42 @@ class MessageController extends Controller
         ]);
 
         $session = Auth::user()->username;
+        $client  = Auth::user()->name ?? 'Test Gateway'; // bisa diganti dari config jika perlu
+        $number  = WhatsappHelper::normalizePhoneNumber($validated['number']);
+        $message = $validated['message'];
 
         try {
-            $response = Http::withHeaders([
-                'X-API-SECRET' => env('API_SECRET'),
-            ])->post(env('WA_BACKEND_URL') . '/session/send', [
-                'session' => $session,
-                'phone'   => $validated['number'],
-                'message' => $validated['message'],
-            ]);
+            $response = $this->wa->sendMessageToSession($session, $number, $message);
+            $success  = $response && $response->successful();
 
             MessageLog::create([
-                'client_name'   => 'Test Gateway',
+                'client_name'   => $client,
                 'session_name'  => $session,
-                'phone'         => $validated['number'],
-                'message'       => $validated['message'],
-                'status'        => $response->successful() ? 'success' : 'failed',
-                'response'      => $response->body(),
+                'phone'         => $number,
+                'message'       => $message,
+                'status'        => $success ? 'success' : 'failed',
+                'response'      => $response?->body(),
                 'sent_at'       => now(),
             ]);
 
-            if ($response->successful()) {
-                return back()->with('success', 'Pesan berhasil dikirim!');
-            }
+            return back()->with($success ? 'success' : 'error', $success
+                ? 'Pesan berhasil dikirim!'
+                : 'Gagal mengirim pesan. Server membalas: ' . $response?->body()
+            );
 
-            return back()->with('error', 'Gagal mengirim pesan. Server membalas: ' . $response->body());
         } catch (\Exception $e) {
+            Log::error('Send message error: ' . $e->getMessage());
+
             MessageLog::create([
-                'client_name'   => 'Test Gateway',
+                'client_name'   => $client,
                 'session_name'  => $session,
-                'phone'         => $validated['number'],
-                'message'       => $validated['message'],
+                'phone'         => $number,
+                'message'       => $message,
                 'status'        => 'failed',
                 'response'      => $e->getMessage(),
                 'sent_at'       => now(),
             ]);
-            
+
             return back()->with('error', 'Error saat mengirim pesan: ' . $e->getMessage());
         }
     }

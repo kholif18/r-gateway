@@ -2,90 +2,94 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Setting;
 use App\Models\ApiClient;
 use App\Models\MessageLog;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Http;
+use App\Services\WhatsAppService;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use function App\Helpers\Setting\setting; 
 
 class WhatsappApiController extends Controller
 {
-    protected $backendUrl;
-    protected $apiSecret;
+    protected WhatsAppService $wa;
 
-    public function __construct()
+    public function __construct(WhatsAppService $wa)
     {
-        $this->backendUrl = env('WA_BACKEND_URL');
-        $this->apiSecret = env('API_SECRET');
+        $this->wa = $wa;
     }
 
     public function send(Request $request)
     {
-        $to = $request->input('to');
-        $msg = $request->input('msg');
-        $secret = $request->input('secret');
-        $clientName = $request->input('client');
+        // Validasi input awal
+        $validator = Validator::make($request->all(), [
+            'to'     => 'required|string',
+            'msg'    => 'required|string',
+            'client' => 'required|string',
+            'secret' => 'required|string',
+        ]);
 
-        // Cari client di DB
-        $client = ApiClient::where('client_name', $clientName)
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()->first()], 400);
+        }
+
+        $to     = $request->input('to');
+        $msg    = $request->input('msg');
+        $client = $request->input('client');
+        $secret = $request->input('secret');
+
+        // Cek client valid
+        $clientData = ApiClient::where('client_name', $client)
             ->where('api_token', $secret)
             ->where('is_active', true)
             ->first();
 
-        if (!$client) {
+        if (!$clientData) {
             return response()->json(['error' => 'Client tidak valid atau token salah'], 403);
         }
 
-        if (!$to || !$msg) {
-            return response()->json(['error' => 'to dan msg wajib diisi'], 400);
-        }
-
-        // Ambil session dari DB
-        $session = $client->session_name;
+        $session = $clientData->session_name;
 
         if (!$session) {
             return response()->json(['error' => 'Session belum dikonfigurasi untuk client ini'], 400);
         }
 
-        try {
-            $timeout = setting("{$session}_timeout", 30);
-            $maxRetry = setting("{$session}_max-retry", 3);
-            $retryInterval = setting("{$session}_retry-interval", 10);
+        // Konfigurasi timeout & retry
+        $timeout       = setting("{$session}_timeout", 30);
+        $maxRetry      = setting("{$session}_max-retry", 3);
+        $retryInterval = setting("{$session}_retry-interval", 10);
 
-            $response = Http::withHeaders([
-                'X-API-SECRET' => env('API_SECRET'),
-            ])
-            ->timeout((int) $timeout)
-            ->retry((int) $maxRetry, (int) $retryInterval * 1000) // dalam milidetik
-            ->post(env('WA_BACKEND_URL') . '/session/send', [
-                'session' => $session,
-                'phone'   => $to,
-                'message' => $msg,
+        try {
+            $response = $this->wa->sendMessageToSession($session, $to, $msg, [
+                'timeout'  => $timeout,
+                'retries'  => $maxRetry,
+                'interval' => $retryInterval,
             ]);
 
             MessageLog::create([
-                'client_name'   => $clientName,
+                'client_name'   => $client,
                 'session_name'  => $session,
                 'phone'         => $to,
                 'message'       => $msg,
-                'status'        => $response->successful() ? 'success' : 'failed',
-                'response'      => $response->body(),
-                'sent_at'       => $response->successful() ? now() : null,
+                'status'        => $response?->successful() ? 'success' : 'failed',
+                'response'      => $response?->body(),
+                'sent_at'       => $response?->successful() ? now() : null,
             ]);
 
-            if ($response->successful()) {
+            if ($response && $response->successful()) {
                 return response()->json($response->json());
             }
 
             return response()->json([
-                'error' => 'Gagal mengirim ke backend',
-                'backend_response' => $response->body()
-            ], $response->status());
+                'error'            => 'Gagal mengirim ke backend',
+                'backend_response' => $response?->body(),
+            ], $response?->status() ?? 500);
         } catch (\Exception $e) {
-            // Log jika error koneksi/timeout
+            Log::error('WA API Send Error', ['error' => $e->getMessage()]);
+
             MessageLog::create([
-                'client_name'   => $clientName,
+                'client_name'   => $client,
                 'session_name'  => $session,
                 'phone'         => $to,
                 'message'       => $msg,
@@ -94,7 +98,7 @@ class WhatsappApiController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Exception saat mengirim ke backend',
+                'error'     => 'Exception saat mengirim ke backend',
                 'exception' => $e->getMessage(),
             ], 500);
         }

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use App\Helpers\WhatsappHelper;
 
 class UserController extends Controller
 {
@@ -19,6 +20,7 @@ class UserController extends Controller
 
     public function update(Request $request)
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         $validator = Validator::make($request->all(), [
@@ -31,35 +33,36 @@ class UserController extends Controller
             'avatar' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
             'avatar.file' => 'File tidak valid atau terlalu besar.',
-            'avatar.mimes' => 'Format file tidak didukung. Gunakan jpeg, png, jpg, atau gif',
-            'avatar.max' => 'Ukuran file terlalu besar. Maksimal 2MB',
+            'avatar.mimes' => 'Format file tidak didukung. Gunakan jpeg, png, jpg, atau gif.',
+            'avatar.max' => 'Ukuran file terlalu besar. Maksimal 2MB.',
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
 
-        // Update data user
-        $user->name = $request->name;
-        $user->username = $request->username;
-        $user->email = $request->email;
-        $user->phone = $request->phone;
-        $user->address = $request->address;
+        // ✅ Update data user
+        $user->fill([
+            'name' => $request->name,
+            'username' => $request->username,
+            'email' => $request->email,
+            'phone' => WhatsappHelper::normalizePhoneNumber($request->phone), // ⬅️ gunakan helper
+            'address' => $request->address,
+        ]);
 
-        // Handle avatar upload
-        if ($request->hasFile('avatar')) {
-            // Hapus avatar lama jika ada
-            if ($user->avatar) {
-                Storage::delete($user->avatar);
-            }
-            
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $user->avatar = $path;
+        // ✅ Update password jika diisi
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
         }
 
-        // Update password jika diisi
-        if ($request->password) {
-            $user->password = Hash::make($request->password);
+        // ✅ Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $path;
         }
 
         $user->save();

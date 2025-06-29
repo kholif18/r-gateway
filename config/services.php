@@ -36,8 +36,7 @@ return [
     ],
 
     'whatsapp' => [
-        'url' => env('WHATSAPP_URL', 'http://wa-gateway:3000'),
-        'key' => env('WA_GATEWAY_KEY'),
+        'url' => env('WA_BACKEND_URL'),
+        'key' => env('API_SECRET'),
     ],
-
 ];

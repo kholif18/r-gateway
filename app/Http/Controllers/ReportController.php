@@ -2,37 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
 use App\Models\MessageLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ReportController extends Controller
 {
     public function index()
     {
-        // Query utama untuk laporan (pakai pagination)
-        $reports = MessageLog::select(
+        // Ambil data 30 hari terakhir
+        $thirtyDaysAgo = Carbon::now()->subDays(30);
+
+        $baseQuery = MessageLog::select(
                 DB::raw("DATE_FORMAT(sent_at, '%d %b %Y') as date"),
-                DB::raw('COUNT(*) as total')
+                DB::raw("COUNT(*) as total")
             )
+            ->where('sent_at', '>=', $thirtyDaysAgo)
             ->groupBy('date')
-            ->orderByDesc('date')
-            ->paginate(20); // <== Tambahkan pagination di sini
+            ->orderByDesc('date');
 
-        // Query ulang (tanpa pagination) untuk chart
-        $chartQuery = MessageLog::select(
-                DB::raw("DATE_FORMAT(sent_at, '%d %b %Y') as date"),
-                DB::raw('COUNT(*) as total')
-            )
-            ->where('sent_at', '>=', Carbon::now()->subDays(30))
-            ->groupBy('date')
-            ->orderByDesc('date')
-            ->get();
+        // 📊 Data untuk chart (tanpa pagination)
+        $chartData = $baseQuery->get();
+        $chartLabels = $chartData->pluck('date');
+        $chartCounts = $chartData->pluck('total');
 
-        $chartLabels = $chartQuery->pluck('date');
-        $chartData = $chartQuery->pluck('total');
+        // 📄 Data untuk tabel (dengan pagination)
+        $reports = (clone $baseQuery)->paginate(20);
 
-        return view('report', compact('reports', 'chartLabels', 'chartData'));
+        return view('report', compact('reports', 'chartLabels', 'chartCounts', 'chartData'));
     }
 }

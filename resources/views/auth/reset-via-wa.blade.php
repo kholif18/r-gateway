@@ -1,80 +1,39 @@
 @extends('layouts.auth')
 
-@section('title', 'Reset Password')
+@section('title', 'Kode OTP')
 
 @section('content')
     <div class="auth-form">
         <div class="auth-header">
-            <h2>Reset Password</h2>
-            <p>Masukkan OTP dari whatsapp anda dan buat password baru.</p>
+            <h2>Kode OTP</h2>
         </div>
         
         <form method="POST" action="{{ route('password.wa-reset') }}">
         @csrf
-            <div class="mb-2">
-                <input class="form-control" type="hidden" name="phone" value="{{ session('phone') }}">
+            <input class="form-control" type="hidden" name="phone" value="{{ session('phone') }}">
+
+            <div class="auth-footer mb-4">
+                Kode OTP telah dikirim ke WhatsApp: <strong>{{ session('phone') }}</strong><br>
+                Berlaku selama 3 menit.
             </div>
 
             <div class="mb-2">
-                <input class="form-control" type="text" name="otp" placeholder="Kode OTP" required>
-            </div>
-            
-            <div class="mb-2">
-                <label for="password">New Password</label>
-                <div class="password-container">
-                    <input id="password" class="form-control" type="password" name="password" placeholder="********" required autocomplete="new-password">
-                    <span class="password-toggle" id="toggle-password-1">
-                        <i class="fas fa-eye"></i>
-                    </span>
-                </div>
-                @error('password')
-                    <span class="text-danger text-sm">{{ $message }}</span>
-                @enderror
-            </div>
-            
-            <div class="mb-2">
-                <label for="password_confirmation">Confirm Password</label>
-                <div class="password-container">
-                    <input id="password_confirmation" class="form-control" type="password" name="password_confirmation" placeholder="********" required autocomplete="new-password">
-                    <span class="password-toggle" id="toggle-password-2">
-                        <i class="fas fa-eye"></i>
-                    </span>
-                </div>
-                @error('password_confirmation')
-                    <span class="text-danger text-sm">{{ $message }}</span>
+                <label for="otp">Kode OTP</label>
+                <input class="form-control" id="otp" type="text" name="otp" placeholder="Kode OTP" required>
+                @error('otp')
+                    <span class="text-sm text-red-500">{{ $message }}</span>
                 @enderror
             </div>
 
             <div>
-                <button type="submit" class="btn-auth">Reset Password</button>
+                <button type="submit" class="btn-auth">Verifikasi OTP</button>
             </div>
-            
             <div class="auth-footer">
-                <p>Belum punya akun? <a href="{{ route('register') }}" id="register-link">Buat akun baru</a></p>
+                <p class="mt-2">
+                    Belum menerima kode? <a href="#" class="text-blue-600 hover:underline">Kirim Ulang</a>
+                </p>
+            {{-- {{ route('password.otp.resend', ['phone' => session('phone')]) }} --}}
             </div>
         </form>
     </div>
 @endsection
-@push('scripts')
-    <script>
-        // Toggle password visibility
-        function setupPasswordToggle(inputId, toggleId) {
-            const passwordInput = document.getElementById(inputId);
-            const toggleButton = document.getElementById(toggleId);
-
-            if (passwordInput && toggleButton) {
-                toggleButton.addEventListener('click', function () {
-                    const isPassword = passwordInput.type === 'password';
-                    passwordInput.type = isPassword ? 'text' : 'password';
-                    toggleButton.innerHTML = isPassword
-                        ? '<i class="fas fa-eye-slash"></i>'
-                        : '<i class="fas fa-eye"></i>';
-                });
-            }
-        }
-
-        // Aktifkan toggle untuk kedua input
-        setupPasswordToggle('password', 'toggle-password-1');
-        setupPasswordToggle('password_confirmation', 'toggle-password-2');
-    </script>
-@endpush

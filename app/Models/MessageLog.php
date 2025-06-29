@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Helpers\WhatsappHelper;
 
 class MessageLog extends Model
 {
@@ -21,4 +22,12 @@ class MessageLog extends Model
     ];
 
     public $timestamps = false;
+
+    /**
+     * 🔁 Mutator untuk otomatis normalisasi nomor telepon
+     */
+    public function setPhoneAttribute($value)
+    {
+        $this->attributes['phone'] = WhatsappHelper::normalizePhoneNumber($value);
+    }
 }

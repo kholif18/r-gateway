@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\OtpResetPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\CustomPasswordResetController;
@@ -42,7 +43,16 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password-wa', [CustomPasswordResetController::class, 'store'])
         ->name('password.wa-reset');
 
+    Route::get('/password/otp', [OtpResetPasswordController::class, 'showOtpForm'])->name('password.otp');
+    Route::post('/password/otp', [OtpResetPasswordController::class, 'verifyOtp'])->name('password.otp.verify');
+    Route::get('/password/otp/resend', [OtpResetPasswordController::class, 'resendOtp'])->name('password.otp.resend');
+    // Reset password manual setelah OTP
+    Route::get('/password/reset-form', function () {
+        return view('auth.reset-password-manual');
+    })->name('password.reset.form');
 
+    // (opsional) Aksi menyimpan password baru
+    Route::post('/password/reset-form', [OtpResetPasswordController::class, 'updatePassword'])->name('password.reset.update');
 });
 
 Route::middleware('auth')->group(function () {

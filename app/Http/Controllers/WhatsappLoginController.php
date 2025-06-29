@@ -4,127 +4,96 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
+use App\Services\WhatsAppService;
 
 class WhatsappLoginController extends Controller
 {
-    protected $backendUrl;
-    protected $apiSecret;
+    protected WhatsAppService $whatsapp;
 
-    public function __construct()
+    public function __construct(WhatsAppService $whatsapp)
     {
-        $this->backendUrl = env('WA_BACKEND_URL');
-        $this->apiSecret = env('API_SECRET');
+        $this->whatsapp = $whatsapp;
     }
 
-    protected function getSessionName()
+    protected function getSession(): ?string
     {
-        return 'user_' . Auth::id();
+        return Auth::check() ? Auth::user()->username : null;
     }
 
     public function index()
     {
-        $session = Auth::user()->username ?? null;
+        $session = $this->getSession();
         $status = Cache::get("whatsapp_status_{$session}", 'DISCONNECTED');
 
-        return view('wa-login', [
-            'status' => $status,
-        ]);
+        return view('wa-login', compact('status'));
     }
 
     public function start(Request $request)
     {
-        if (!Auth::check() || !Auth::user()->username) {
+        $session = $this->getSession();
+
+        if (!$session) {
             return response()->json(['error' => 'Unauthorized or username missing'], 403);
         }
 
-        $session = Auth::user()->username;
+        // ✅ Cek status session
+        $status = $this->whatsapp->checkSessionStatus($session);
 
-        // ✅ 1. Cek status terlebih dahulu
-        $statusResponse = Http::withHeaders([
-            'X-API-SECRET' => $this->apiSecret,
-        ])->get("{$this->backendUrl}/session/status?session={$session}");
-
-        if ($statusResponse->ok()) {
-            $status = strtolower($statusResponse->json('status'));
-
-            if ($status === 'connected' || $status === 'qr') {
-                return response()->json([
-                    'message' => 'Session already active or pending QR',
-                    'status' => $status,
-                ], 200);
-            }
+        if ($status && in_array(strtolower($status['status']), ['connected', 'qr'])) {
+            return response()->json([
+                'message' => 'Session already active or waiting for QR scan',
+                'status' => $status['status'],
+            ], 200);
         }
 
-        // ✅ 2. Jika belum aktif, baru start
-        $response = Http::withHeaders([
-            'X-API-SECRET' => $this->apiSecret,
-        ])->post("{$this->backendUrl}/session/start", [
-            'session' => $session
-        ]);
-
+        // ✅ Mulai sesi baru
+        $response = $this->whatsapp->startSession($session);
         return response()->json($response->json(), $response->status());
     }
 
     public function getQrImage()
     {
-        if (!Auth::check() || !Auth::user()->username) {
+        $session = $this->getSession();
+
+        if (!$session) {
             return response()->json(['error' => 'Unauthorized or username missing'], 403);
         }
 
-        $session = Auth::user()->username;
+        $status = $this->whatsapp->checkSessionStatus($session);
 
-        // ✅ Cek status dulu
-        $statusResponse = Http::withHeaders([
-            'X-API-SECRET' => $this->apiSecret,
-        ])->get("{$this->backendUrl}/session/status?session={$session}");
-
-        if ($statusResponse->ok()) {
-            $status = strtolower($statusResponse->json('status'));
-            if ($status === 'connected') {
-                return response()->noContent(); // 204
-            }
-        }
-        
-        $response = Http::withHeaders([
-            'X-API-SECRET' => $this->apiSecret,
-        ])->get("{$this->backendUrl}/session/qr.png?session={$session}");
-
-        if ($response->ok()) {
-            return response($response->body(), 200)->header('Content-Type', 'image/png');
+        if ($status && strtolower($status['status']) === 'connected') {
+            return response()->noContent(); // Sudah login, tidak perlu QR
         }
 
-        return response()->json(['error' => 'QR tidak tersedia'], 404);
+        $qrResponse = $this->whatsapp->getQrCode($session);
+
+        return $qrResponse && $qrResponse->ok()
+            ? response($qrResponse->body(), 200)->header('Content-Type', 'image/png')
+            : response()->json(['error' => 'QR tidak tersedia'], 404);
     }
 
     public function status()
     {
-        if (!Auth::check() || !Auth::user()->username) {
+        $session = $this->getSession();
+
+        if (!$session) {
             return response()->json(['error' => 'Unauthorized or username missing'], 403);
         }
-        $session = Auth::user()->username;
 
-
-        $response = Http::withHeaders([
-            'X-API-SECRET' => $this->apiSecret,
-        ])->get("{$this->backendUrl}/session/status?session={$session}");
-
-        return response()->json($response->json(), $response->status());
+        $status = $this->whatsapp->checkSessionStatus($session);
+        return response()->json($status ?? ['status' => 'disconnected']);
     }
 
     public function logout()
     {
-        if (!Auth::check() || !Auth::user()->username) {
+        $session = $this->getSession();
+
+        if (!$session) {
             return response()->json(['error' => 'Unauthorized or username missing'], 403);
         }
-        $session = Auth::user()->username;
 
-
-        $response = Http::withHeaders([
-            'X-API-SECRET' => $this->apiSecret,
-        ])->get("{$this->backendUrl}/session/logout?session={$session}");
+        $this->whatsapp->logoutSession($session);
 
         return redirect()->route('whatsapp.login')->with('status', 'Berhasil logout');
     }

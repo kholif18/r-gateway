@@ -38,8 +38,21 @@
                     </div>
                     <div class="form-section">
                         <div class="form-group">
-                            <h4>Informasi</h4>
-                            <p>Masukkan nomor WhatsApp menggunakan kode negara. Contoh: untuk nomor Indonesia, gunakan awalan <strong>62</strong> (bukan 0) tanpa tanda kurung atau spasi. Contoh: <code>6281234567890</code>.</p>
+                            <strong>Informasi</strong>
+                            <ul class="text-sm text-gray-600 mt-2">
+                                <li>
+                                    Status koneksi WA:
+                                    @if($waConnected)
+                                        <span class="badge bg-success">Terhubung</span>
+                                    @else
+                                        <span class="badge bg-danger">Tidak Terhubung</span>
+                                    @endif
+                                </li>
+                                <li>Gunakan untuk menguji pengiriman pesan langsung ke WhatsApp.</li>
+                                <li>Nomor bisa diawali <code>0</code> atau <code>62</code>, sistem akan menyesuaikan.</li>
+                                <li>Pastikan nomor aktif dan terhubung dengan WhatsApp.</li>
+                                <li>Pesan akan dikirim dari akun WhatsApp Anda yang sedang login.</li>
+                            </ul>
                         </div>
                     </div>
                 </div>

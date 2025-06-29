@@ -26,7 +26,8 @@
             </div>
             
             <div class="auth-footer mb-4">
-                <p>Jika ingin menerima kode OTP via WhatsApp, pastikan nomor tersebut sudah login di sistem kami.</p>
+                <p>Jika ingin menerima kode OTP via WhatsApp, pastikan nomor tersebut sudah login di sistem kami.</p> <br>
+                <p>Jika belum login, Anda bisa memilih reset via email.</p>
             </div>
 
             <div>

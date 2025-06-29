@@ -16,97 +16,80 @@ class WhatsAppService
         $this->apiKey = config('services.whatsapp.key');
     }
 
-    public function startSession(string $sessionName)
+    public function startSession(string $session)
     {
         return Http::timeout(30)
-        ->withHeaders(['apikey' => $this->apiKey])
-        ->post($this->baseUrl . '/session/create', [
-            'session' => $sessionName,
-            'multiDevice' => true,
-            'browserName' => 'Laravel WA Gateway', // Nama custom
-            'browserVersion' => '1.0' // Versi browser
-        ]);
+            ->withHeaders(['apikey' => $this->apiKey])
+            ->post("{$this->baseUrl}/session/start", [
+                'session' => $session,
+            ]);
     }
 
     public function getSessions()
     {
         try {
-            $res = Http::get($this->baseUrl . '/session');
-            return $res->json('data') ?? [];
+            return Http::get("{$this->baseUrl}/session")->json('data') ?? [];
         } catch (\Exception $e) {
             Log::error('Get sessions failed: ' . $e->getMessage());
             return [];
         }
     }
-    /**
-     * Check WhatsApp connection status
-     */
-    public function checkStatus()
+
+    public function checkSessionStatus(string $session)
     {
         try {
-            $response = Http::get($this->baseUrl . '/status');
-            return $response->json();
+            $response = Http::withHeaders([
+                'X-API-SECRET' => $this->apiKey,
+            ])->get("{$this->baseUrl}/session/status?session={$session}");
+
+            return $response->ok() ? $response->json() : null;
         } catch (\Exception $e) {
-            Log::error('WhatsApp status check failed: ' . $e->getMessage());
-            return ['error' => $e->getMessage()];
+            Log::error('WhatsApp session status failed: ' . $e->getMessage());
+            return null;
         }
     }
 
-    /**
-     * Send WhatsApp message
-     */
-    public function sendMessage(string $to, string $message)
+    public function sendMessageToSession(string $session, string $phone, string $message)
     {
         try {
-            $response = Http::post($this->baseUrl . '/send-message', [
-                'number' => $to,
+            return Http::withHeaders([
+                'X-API-SECRET' => $this->apiKey,
+            ])->post("{$this->baseUrl}/session/send", [
+                'session' => $session,
+                'phone'   => $phone,
                 'message' => $message,
             ]);
-
-            return $response->json();
         } catch (\Exception $e) {
-            Log::error('WhatsApp message sending failed: ' . $e->getMessage());
-            return ['error' => $e->getMessage()];
+            Log::error("Send message failed: " . $e->getMessage());
+            return null;
         }
     }
 
-    /**
-     * Get QR code for authentication
-     */
-    public function getQrCode()
-    {
-        try {
-            $response = Http::get($this->baseUrl . '/qr');
-            return $response->json();
-        } catch (\Exception $e) {
-            Log::error('WhatsApp QR code fetch failed: ' . $e->getMessage());
-            return ['error' => $e->getMessage()];
-        }
-    }
-
-    /**
-     * Logout from session
-     */
-    public function logout()
-    {
-        try {
-            $response = Http::get($this->baseUrl . '/logout');
-            return $response->successful();
-        } catch (\Exception $e) {
-            Log::error('WhatsApp logout failed: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-    public function deleteSession(string $sessionName)
+    public function logoutSession(string $session)
     {
         return Http::withHeaders([
-            'apikey' => $this->apiKey,
-            'Content-Type' => 'application/json'
-        ])
-        ->delete($this->baseUrl . '/session/delete', [
-            'session' => $sessionName
-        ]);
+            'X-API-SECRET' => $this->apiKey,
+        ])->get("{$this->baseUrl}/session/logout?session={$session}");
     }
 
+    public function getQrCode(string $session)
+    {
+        try {
+            return Http::withHeaders([
+                'X-API-SECRET' => $this->apiKey,
+            ])->get("{$this->baseUrl}/session/qr.png?session={$session}");
+        } catch (\Exception $e) {
+            Log::error("QR code fetch failed: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function deleteSession(string $session)
+    {
+        return Http::withHeaders([
+            'X-API-SECRET' => $this->apiKey,
+        ])->delete("{$this->baseUrl}/session/delete", [
+            'session' => $session,
+        ]);
+    }
 }

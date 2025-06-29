@@ -18,20 +18,21 @@ class ApiClientController extends Controller
 
     public function store(Request $request)
     {
+        // Normalisasi nama client
         $request->merge([
             'client_name' => Str::of($request->client_name)
                 ->replace(' ', '_')
                 ->lower()
-                ->toString(), // ubah jadi huruf kecil semua
+                ->toString(),
         ]);
-        
+
         $validator = Validator::make($request->all(), [
             'client_name' => [
                 'required',
                 'string',
                 'max:255',
                 'unique:api_clients,client_name',
-                'regex:/^[a-z0-9\-_]+$/', // hanya huruf, angka, strip, dan underscore
+                'regex:/^[a-z0-9\-_]+$/',
             ],
         ], [
             'client_name.required' => 'Nama aplikasi wajib diisi.',
@@ -42,41 +43,34 @@ class ApiClientController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', $validator->errors()->first());
+            return back()->withInput()->with('error', $validator->errors()->first());
         }
 
         ApiClient::create([
-            'client_name' => $request->input('client_name'),
-            'api_token' => Str::uuid()->toString(),
+            'client_name'   => $request->client_name,
+            'api_token'     => Str::uuid()->toString(),
             'session_name'  => Auth::user()->username,
-            'is_active' => true,
+            'is_active'     => true,
         ]);
 
-        return redirect()->route('clients.index')->with('success', 'Client berhasil ditambahkan');
+        return redirect()->route('clients.index')->with('success', 'Client berhasil ditambahkan.');
     }
 
     public function toggle(ApiClient $client)
     {
         $client->update(['is_active' => !$client->is_active]);
-        return redirect()->back()->with('success', 'Status client diperbarui.');
+        return back()->with('success', 'Status client diperbarui.');
     }
 
     public function regenerate(ApiClient $client)
     {
-        $client->update([
-            'api_token' => Str::uuid()->toString(),
-        ]);
-        return redirect()->back()->with('success', 'Token baru berhasil dibuat.');
+        $client->update(['api_token' => Str::uuid()->toString()]);
+        return back()->with('success', 'Token baru berhasil dibuat.');
     }
 
     public function destroy(ApiClient $client)
     {
         $client->delete();
-
-        return redirect()->route('clients.index')
-            ->with('success', 'Client berhasil dihapus.');
+        return redirect()->route('clients.index')->with('success', 'Client berhasil dihapus.');
     }
-
 }
