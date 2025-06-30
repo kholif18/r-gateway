@@ -31,31 +31,32 @@ class UserController extends Controller
             'address' => 'nullable|string',
             'password' => 'nullable|confirmed|min:8',
             'avatar' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:2048',
-        ], [
-            'avatar.file' => 'File tidak valid atau terlalu besar.',
-            'avatar.mimes' => 'Format file tidak didukung. Gunakan jpeg, png, jpg, atau gif.',
-            'avatar.max' => 'Ukuran file terlalu besar. Maksimal 2MB.',
         ]);
 
         if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
             return back()->withErrors($validator)->withInput();
         }
 
-        // ✅ Update data user
+        // Update data
         $user->fill([
             'name' => $request->name,
             'username' => $request->username,
             'email' => $request->email,
-            'phone' => WhatsappHelper::normalizePhoneNumber($request->phone), // ⬅️ gunakan helper
+            'phone' => WhatsappHelper::normalizePhoneNumber($request->phone),
             'address' => $request->address,
         ]);
 
-        // ✅ Update password jika diisi
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
         }
 
-        // ✅ Handle avatar upload
         if ($request->hasFile('avatar')) {
             if ($user->avatar) {
                 Storage::disk('public')->delete($user->avatar);
@@ -67,6 +68,11 @@ class UserController extends Controller
 
         $user->save();
 
-        return back()->with('success', 'Profil berhasil diperbarui!');
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Profil berhasil diperbarui!']);
+        }
+
+        return response()->json(['message' => 'Profile updated successfully.']);
     }
+
 }

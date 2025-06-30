@@ -28,6 +28,7 @@ class ForgotPasswordCustomController extends Controller
 
         // Jika WA login, kirim OTP via WA (sederhana, tanpa implementasi OTP penuh)
         if ($user->wa_connected) {
+            session(['otp_phone' => $user->phone]);
             // Kirim OTP WA di sini
             Log::info("OTP dikirim ke WA: {$user->phone}");
 

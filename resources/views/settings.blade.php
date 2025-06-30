@@ -121,13 +121,24 @@
             const toastEl = document.getElementById('feedbackToast');
             const toast = new bootstrap.Toast(toastEl);
 
-            document.getElementById('toastTitle').innerText = title;
-            document.getElementById('toastBody').innerText = message;
-
+            const titleEl = document.getElementById('toastTitle');
+            const bodyEl = document.getElementById('toastBody');
             const header = document.getElementById('toastHeader');
+
+            // Reset
             header.className = 'toast-header';
-            if (type === 'success') header.classList.add('bg-success', 'text-white');
-            else if (type === 'error') header.classList.add('bg-danger', 'text-white');
+            toastEl.classList.remove('bg-success', 'bg-danger');
+
+            titleEl.innerText = title;
+            bodyEl.innerText = message;
+
+            if (type === 'success') {
+                header.classList.add('bg-success', 'text-white');
+                toastEl.classList.add('bg-success', 'text-white');
+            } else {
+                header.classList.add('bg-danger', 'text-white');
+                toastEl.classList.add('bg-danger', 'text-white');
+            }
 
             toast.show();
         }

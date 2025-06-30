@@ -39,8 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/save', [SettingsController::class, 'save']);
     Route::post('/settings/reset', [SettingsController::class, 'reset'])->name('settings.reset');
 
-    Route::get('/profile', [UserController::class, 'edit'])->middleware(['auth'])->name('profile.edit');
-    Route::put('/profile', [UserController::class, 'update'])->name('profile.update');
+    Route::resource('profile', UserController::class)->only(['edit', 'update']);
 
     Route::resource('clients', ApiClientController::class)->except('show');
     Route::patch('/clients/{client}/toggle', [ApiClientController::class, 'toggle'])->name('clients.toggle');

@@ -8,52 +8,38 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
-use App\Http\Controllers\Auth\CustomPasswordResetController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->name('register');
 
+    // 🔐 Auth
+    Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+    // 📝 Register
+    Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('register', [RegisteredUserController::class, 'store']);
 
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
-        ->name('login');
+    // 🔄 Reset Password (Email & WhatsApp)
+    Route::prefix('password')->group(function () {
+        Route::get('forgot', [PasswordResetLinkController::class, 'create'])->name('password.request');
+        Route::post('forgot', [PasswordResetLinkController::class, 'store'])->name('password.email');
 
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+        Route::get('reset/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+        Route::post('reset', [NewPasswordController::class, 'store'])->name('password.store');
 
-    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
-        ->name('password.request');
-
-    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
-        ->name('password.email');
-
-    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
-        ->name('password.reset');
-
-    Route::post('reset-password', [NewPasswordController::class, 'store'])
-        ->name('password.store');
-
-    Route::get('/otp', function () {
-        return view('auth.otp');
+        // WA OTP Flow
+        Route::get('otp', [OtpController::class, 'show'])->name('password.otp');
+        Route::post('otp', [OtpController::class, 'verify'])->name('password.otp.verify');
+        Route::get('otp/resend', [OtpController::class, 'resendOtp'])->name('password.otp.resend');
+        Route::get('wa-reset-form', [OtpController::class, 'resetForm'])->name('password.wa.form');
+        Route::post('wa-reset', [OtpController::class, 'resetPassword'])->name('password.wa.reset');
     });
-
-    Route::post('/reset-password-wa', [CustomPasswordResetController::class, 'store'])
-        ->name('password.wa-reset');
-
-    Route::get('/password/otp', [OtpController::class, 'show'])->name('password.otp');
-    Route::post('/password/otp', [OtpController::class, 'verify'])->name('password.otp.verify');
-    Route::get('/password/otp/resend', [OtpController::class, 'resendOtp'])->name('password.otp.resend');
-    // Reset password manual setelah OTP
-    Route::get('/password/reset-form', function () {
-        return view('auth.reset-password-manual');
-    })->name('password.reset.form');
-
-    // (opsional) Aksi menyimpan password baru
-    Route::post('/password/reset-form', [OtpController::class, 'updatePassword'])->name('password.reset.update');
 });
+
 
 Route::middleware('auth')->group(function () {
     Route::get('verify-email', EmailVerificationPromptController::class)

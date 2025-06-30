@@ -59,4 +59,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    protected $casts = [
+        'otp_expires_at' => 'datetime',
+    ];
+
 }

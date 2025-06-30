@@ -8,11 +8,6 @@
             <div class="card-title">Test Message</div>
         </div>
         <div class="card-body">
-            @if (session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @elseif (session('error'))
-                <div class="alert alert-danger">{{ session('error') }}</div>
-            @endif
 
             <form method="POST" action="{{ route('whatsapp.message.send') }}">
             @csrf
@@ -59,4 +54,52 @@
             </form>
         </div>
     </div>
+
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
+        <div id="feedbackToast" class="toast border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div id="toastHeader" class="toast-header">
+                <strong class="me-auto" id="toastTitle"></strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastBody"></div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+    <script>
+        function showToast(title, message, type = 'success') {
+            const toastEl = document.getElementById('feedbackToast');
+            const toast = new bootstrap.Toast(toastEl);
+
+            const titleEl = document.getElementById('toastTitle');
+            const bodyEl = document.getElementById('toastBody');
+            const header = document.getElementById('toastHeader');
+
+            // Reset
+            header.className = 'toast-header';
+            toastEl.classList.remove('bg-success', 'bg-danger');
+
+            titleEl.innerText = title;
+            bodyEl.innerText = message;
+
+            if (type === 'success') {
+                header.classList.add('bg-success', 'text-white');
+                toastEl.classList.add('bg-success', 'text-white');
+            } else {
+                header.classList.add('bg-danger', 'text-white');
+                toastEl.classList.add('bg-danger', 'text-white');
+            }
+
+            toast.show();
+        }
+
+        // ✅ Flash Message Handler (langsung dari Blade)
+        @if (session('success'))
+            showToast('Sukses', @json(session('success')), 'success');
+        @elseif (session('error'))
+            showToast('Gagal', @json(session('error')), 'error');
+        @endif
+    </script>
+
+@endpush

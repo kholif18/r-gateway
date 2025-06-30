@@ -76,13 +76,20 @@ class PasswordResetLinkController extends Controller
             $user->otp_expires_at = now()->addMinutes(3);
             $user->save();
 
-            $sendStatus = $this->wa->sendMessageToSession($session, $phone, "Kode OTP Anda adalah *$otp*\nBerlaku 3 menit.");
+            $sendStatus = $this->wa->sendMessageToSession($session, $phone, 
+                "Kode OTP Anda adalah *$otp*.\n\n" .
+                "🕒 Kode ini hanya berlaku selama 3 menit.\n\n" .
+                "⚠️ *Jangan berikan kode ini kepada siapa pun*, termasuk pihak yang mengaku dari R Gateway.\n\n" .
+                "Jika Anda tidak meminta kode ini, abaikan pesan ini."
+            );
+
 
             if (!$sendStatus) {
                 return back()->withErrors(['email_or_wa' => 'Gagal mengirim OTP ke WhatsApp.']);
             }
 
-            return redirect()->route('password.otp')->with('phone', $phone);
+            session(['otp_phone' => $phone]);
+            return redirect()->route('password.otp')->with('status', 'Kode OTP telah dikirim ke WhatsApp Anda.');
         }
 
         // ❌ Gagal validasi semua
