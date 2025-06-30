@@ -124,24 +124,27 @@
         const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
         
         document.addEventListener('DOMContentLoaded', function () {
+            const toastEl = document.getElementById('feedbackToast');
+            const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+            const header = document.getElementById('toastHeader');
+            const titleEl = document.getElementById('toastTitle');
+            const bodyEl = document.getElementById('toastBody');
+
+            // Reset class
+            header.className = 'toast-header';
+            toastEl.className = 'toast border-0';
+
             @if (session('success'))
-                const toastEl = document.getElementById('feedbackToast');
-                const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
-
-                // Set konten dan warna header
-                document.getElementById('toastTitle').textContent = 'Sukses';
-                document.getElementById('toastHeader').classList.add('bg-success', 'text-white');
-                document.getElementById('toastBody').textContent = @json(session('success'));
-
+                titleEl.innerText = 'Sukses';
+                bodyEl.innerText = @json(session('success'));
+                header.classList.add('bg-success', 'text-white');
+                toastEl.classList.add('bg-success', 'text-white');
                 toast.show();
             @elseif (session('error'))
-                const toastEl = document.getElementById('feedbackToast');
-                const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
-
-                document.getElementById('toastTitle').textContent = 'Gagal';
-                document.getElementById('toastHeader').classList.add('bg-danger', 'text-white');
-                document.getElementById('toastBody').textContent = @json(session('error'));
-
+                titleEl.innerText = 'Gagal';
+                bodyEl.innerText = @json(session('error'));
+                header.classList.add('bg-danger', 'text-white');
+                toastEl.classList.add('bg-danger', 'text-white');
                 toast.show();
             @endif
         });
