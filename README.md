@@ -34,7 +34,7 @@ php artisan key:generate
 Edit dan tambahkan kode berikut di paling bawah pada file `.env`:
 
 ```env
-WA_BACKEND_URL=http://wa-backend:3000
+WA_BACKEND_URL=http://wa_backend:3000
 API_SECRET=your_api_secret_key
 ```
 
@@ -51,7 +51,7 @@ php artisan serve
 Pastikan backend WhatsApp (`wa-backend`) juga berjalan di port yang sesuai.
 Jika wa-backend berjalan di host, isikan alamat ip wa-beckend tersebut
 Contoh:
-http://wa-backend:3000 -> misal di docker
+http://wa_backend:3000 -> misal di docker
 http://localhost:3000 -> host
 http://127.0.0.1:3000
 
@@ -124,7 +124,7 @@ Cek halaman bantuan di aplikasi:
 
 ## 🛠 Stack Teknologi
 
-- Laravel 10+
+- Laravel 12
 - Bootstrap 5
 - WhatsApp Web.js (backend)
 - Docker (opsional)
