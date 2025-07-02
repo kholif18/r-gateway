@@ -56,7 +56,7 @@
                     @forelse ($logs as $log)
                         <tr>
                             <td>{{ $log->client_name }}</td>
-                            <td>{{ $log->phone }}</td>
+                            <td>{{ \App\Helpers\WhatsappHelper::formatPhoneDisplay($log->phone) }}</td>
                             <td>{{ Str::limit($log->message, 50) }}</td>
                             <td>
                                 <span class="badge 
