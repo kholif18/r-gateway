@@ -124,4 +124,5 @@ return [
     ],
 
     'version' => env('APP_VERSION', '1.0.0'),
+    'country_code' => env('APP_COUNTRY_CODE', '62'),
 ];

@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\Setting;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
@@ -43,15 +44,17 @@ class WhatsappHelper
     /**
      * Normalisasi nomor telepon menjadi format internasional (tanpa +)
      */
-    public static function normalizePhoneNumber(string $number): string
+    public static function normalizePhoneNumber(string $number, string $countryCode = null): string
     {
+        $countryCode = $countryCode ?? Setting::get('country_code', config('app.country_code', '62'));
+
         $number = preg_replace('/[^0-9]/', '', $number);
 
         if (Str::startsWith($number, '0')) {
-            return '62' . substr($number, 1);
+            return $countryCode . substr($number, 1);
         }
 
-        return ltrim($number, '+');
+        return $number;
     }
 
     /**
@@ -66,12 +69,14 @@ class WhatsappHelper
     /**
      * Format nomor untuk ditampilkan (contoh: 0812-3456-7890)
      */
-    public static function formatPhoneDisplay(string $number): string
+    public static function formatPhoneDisplay(string $number, string $countryCode = null): string
     {
-        $clean = self::normalizePhoneNumber($number);
+        $countryCode = $countryCode ?? Setting::get('country_code', config('app.country_code', '62'));
 
-        if (Str::startsWith($clean, '62')) {
-            return '0' . substr($clean, 2);
+        $clean = self::normalizePhoneNumber($number, $countryCode);
+
+        if (Str::startsWith($clean, $countryCode)) {
+            return '0' . substr($clean, strlen($countryCode));
         }
 
         return $clean;

@@ -24,4 +24,9 @@ class Setting extends Model
             Cache::forget("setting.{$setting->key}");
         });
     }
+
+    public static function get(string $key, $default = null)
+    {
+        return static::where('key', $key)->value('value') ?? $default;
+    }
 }

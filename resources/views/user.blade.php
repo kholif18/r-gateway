@@ -43,7 +43,10 @@
                 {{-- Phone --}}
                 <div class="form-group">
                     <label for="phone">Phone</label>
-                    <input type="text" name="phone" id="phone" class="form-control" value="{{ \App\Helpers\WhatsappHelper::formatPhoneDisplay(old('phone', $user->phone ?? auth()->user()->phone)) }}">
+                    @php
+                        $phone = old('phone', $user->phone ?? auth()->user()->phone);
+                    @endphp
+                    <input type="text" name="phone" id="phone" class="form-control" value="{{ $phone ? \App\Helpers\WhatsappHelper::formatPhoneDisplay(old('phone', $user->phone ?? auth()->user()->phone)) : '' }}">
                 </div>
                 {{-- Address --}}
                 <div class="form-group form-full">

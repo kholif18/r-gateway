@@ -68,7 +68,21 @@
                             </div>
                         </div>
                     </div>
-                    
+                    <!-- Country Code Selection -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="country_code">Default Country Code</label>
+                            <select id="country_code" name="country_code" class="form-control">
+                                <option value="62" {{ old('country_code', $settings['country_code'] ?? '') == '62' ? 'selected' : '' }}>🇮🇩 Indonesia (+62)</option>
+                                <option value="60" {{ old('country_code', $settings['country_code'] ?? '') == '60' ? 'selected' : '' }}>🇲🇾 Malaysia (+60)</option>
+                                <option value="65" {{ old('country_code', $settings['country_code'] ?? '') == '65' ? 'selected' : '' }}>🇸🇬 Singapore (+65)</option>
+                                <option value="1"  {{ old('country_code', $settings['country_code'] ?? '') == '1'  ? 'selected' : '' }}>🇺🇸 United States (+1)</option>
+                                <option value="91" {{ old('country_code', $settings['country_code'] ?? '') == '91' ? 'selected' : '' }}>🇮🇳 India (+91)</option>
+                            </select>
+                            <div class="form-hint">Select the default country code for phone number normalization</div>
+                        </div>
+                    </div>
+
                     <!-- Save Settings -->
                     <div class="settings-section">
                         <button class="btn" id="save-settings">
@@ -145,6 +159,7 @@
                 updateBody.style.display = 'none';
             }
         });
+
         document.getElementById('save-settings').addEventListener('click', function(e) {
             e.preventDefault(); // Tambahkan ini untuk cegah reload
 
