@@ -67,7 +67,6 @@
                                 <div class="form-hint">Time period (in seconds) to reset the number of requests</div>
                             </div>
                         </div>
-
                     </div>
                     
                     <!-- Save Settings -->
@@ -84,6 +83,15 @@
         </div>
     </div>
 
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Update Checker</div>
+            <form method="POST" action="{{ route('settings.check-update') }}">
+                @csrf
+                <button class="btn btn-success">Cek Pembaruan</button>
+            </form>
+        </div>
+    </div>
     <!-- Success Toast -->
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
         <div id="feedbackToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">

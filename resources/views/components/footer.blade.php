@@ -6,8 +6,8 @@
                 <strong>Ravaa Creative</strong>
             </a>. All rights reserved.
         </div>
-        <div>
-            Version 1.0
+        <div class="text-muted">
+            Version {{ config('app.version') }}
         </div>
     </div>
 </footer>

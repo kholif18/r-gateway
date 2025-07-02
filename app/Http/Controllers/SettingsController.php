@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Setting;
 use App\Models\ApiClient;
 use Illuminate\Http\Request;
+use App\Services\UpdateChecker;
 use Illuminate\Support\Facades\Cache;
 
 class SettingsController extends Controller
@@ -65,4 +66,18 @@ class SettingsController extends Controller
     {
         return is_bool($value) ? ($value ? '1' : '0') : (string) $value;
     }
+
+    public function checkUpdate(UpdateChecker $checker)
+    {
+        $result = $checker->check();
+
+        return back()->with('toast', [
+            'type' => $result['is_outdated'] ? 'warning' : 'success',
+            'title' => $result['is_outdated'] ? 'Update Tersedia' : 'Up to date',
+            'message' => $result['is_outdated']
+                ? "Versi terbaru: {$result['latest_version']}"
+                : "Anda sudah menggunakan versi terbaru ({$result['latest_version']})"
+        ]);
+    }
+
 }

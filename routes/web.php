@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
     Route::post('/settings/save', [SettingsController::class, 'save']);
     Route::post('/settings/reset', [SettingsController::class, 'reset'])->name('settings.reset');
+    Route::post('/settings/check-update', [SettingsController::class, 'checkUpdate'])->name('settings.check-update');
 
     // User Profile
     Route::resource('profile', UserController::class)->only(['edit', 'update']);
