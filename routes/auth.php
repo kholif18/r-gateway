@@ -14,16 +14,16 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 
 Route::middleware('guest')->group(function () {
 
-    // 🔐 Auth
+    // Auth
     Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-    // 📝 Register
+    // Register
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('register', [RegisteredUserController::class, 'store']);
 
-    // 🔄 Reset Password (Email & WhatsApp)
+    // Reset Password (Email & WhatsApp)
     Route::prefix('password')->group(function () {
         Route::get('forgot', [PasswordResetLinkController::class, 'create'])->name('password.request');
         Route::post('forgot', [PasswordResetLinkController::class, 'store'])->name('password.email');

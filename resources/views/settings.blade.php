@@ -145,28 +145,48 @@
         //Reset Settings
         document.getElementById('reset-settings').addEventListener('click', function (event) {
             event.preventDefault(); // Mencegah form submit
-            
-            if (confirm('Reset all setting?')) {
-                fetch("{{ route('settings.reset') }}", { // Gunakan named route
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error("Reset failed: " + response.statusText);
-                    return response.json();
-                })
-                .then(data => {
-                    showToast('Success', 'Settings successfully reset!', 'success');
-                    setTimeout(() => location.reload(), 1500); // Reload setelah toast tampil
-                })
-                .catch(error => {
-                    showToast('Error', 'Reset failed: ' + error.message, 'error');
-                    console.error('Reset error:', error);
-                });
-            }
+
+            Swal.fire({
+                title: 'Reset semua pengaturan?',
+                text: 'Pengaturan akan dikembalikan ke default.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, reset!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch("{{ route('settings.reset') }}", {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error("Reset gagal: " + response.statusText);
+                        return response.json();
+                    })
+                    .then(data => {
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: 'Pengaturan berhasil direset.',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+
+                        setTimeout(() => location.reload(), 1600);
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            title: 'Gagal!',
+                            text: 'Terjadi kesalahan: ' + error.message,
+                            icon: 'error'
+                        });
+                        console.error('Reset error:', error);
+                    });
+                }
+            });
         });
     </script>
 @endsection

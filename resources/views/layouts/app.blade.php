@@ -10,6 +10,7 @@
         <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     </head>
     <body>
+        @include('sweetalert2::index')
         <x-sidebar></x-sidebar>
 
         <div class="main-content">
@@ -24,6 +25,7 @@
         <!-- Bootstrap JS Bundle (wajib untuk modal) -->
         <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+        <script src="{{ asset('assets/js/sweetalert2.min.js') }}"></script>
         <script>
             // Mobile menu toggle
             document.querySelector('.menu-toggle').addEventListener('click', function() {

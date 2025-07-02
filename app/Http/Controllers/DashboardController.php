@@ -6,11 +6,13 @@ use Carbon\Carbon;
 use App\Models\MessageLog;
 use App\Helpers\WhatsappHelper;
 use Illuminate\Support\Facades\Auth;
+use App\Services\UpdateChecker;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(UpdateChecker $checker)
     {
+        $update = $checker->check();
         $today = Carbon::today();
         $yesterday = Carbon::yesterday();
 
@@ -39,6 +41,7 @@ class DashboardController extends Controller
             'sentToday',
             'sentTodayGrowth',
             'growthDirection',
+            'update',
             'successRate',
             'lastMessage',
             'successStatus',

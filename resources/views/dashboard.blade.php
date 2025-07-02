@@ -96,7 +96,30 @@
         @else
             <div class="text-center">No messages have been sent yet.</div>
         @endif
+
     </div>
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
+        <div id="feedbackToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div id="toastHeader" class="toast-header">
+                <strong class="me-auto" id="toastTitle"></strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastBody"></div>
+        </div>
+    </div>
+
+    @if ($update['is_outdated'])
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                showToast(
+                    'Pembaruan Tersedia',
+                    `Versi baru <strong>{{ $update['latest_version'] }}</strong> tersedia.<br>{{ $update['changelog'] }}<br>
+                    <a href='{{ $update['url'] }}' target='_blank' class='btn btn-sm btn-light mt-2'>Lihat Update</a>`,
+                    'warning'
+                );
+            });
+        </script>
+    @endif
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -145,6 +168,24 @@
 
             // Set interval refresh setiap 30 detik
             setInterval(fetchGatewayStatus, 30000);
+
+            function showToast(title, message, type = 'success') {
+                const toastEl = document.getElementById('feedbackToast');
+                const toast = new bootstrap.Toast(toastEl);
+
+                document.getElementById('toastTitle').innerText = title;
+                document.getElementById('toastBody').innerHTML = message;
+
+                const header = document.getElementById('toastHeader');
+                header.className = 'toast-header';
+                
+                if (type === 'success') header.classList.add('bg-success', 'text-white');
+                else if (type === 'error') header.classList.add('bg-danger', 'text-white');
+                else if (type === 'warning') header.classList.add('bg-warning', 'text-dark');
+
+                toast.show();
+            }
+
         });
     </script>
 @endsection

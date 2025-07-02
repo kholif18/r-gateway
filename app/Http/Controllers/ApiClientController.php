@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use SweetAlert2\Laravel\Swal;
 
 class ApiClientController extends Controller
 {
@@ -71,6 +72,12 @@ class ApiClientController extends Controller
     public function destroy(ApiClient $client)
     {
         $client->delete();
-        return redirect()->route('clients.index')->with('success', 'Client berhasil dihapus.');
+
+        Swal::success([
+            'title' => 'Berhasil',
+            'text' => 'Client berhasil dihapus.',
+        ]);
+
+        return redirect()->route('clients.index');
     }
 }

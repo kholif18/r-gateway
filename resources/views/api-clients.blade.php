@@ -54,12 +54,10 @@
                                     </button>
                                 </form>
 
-                                {{-- Delete --}}
-                                <form action="{{ route('clients.destroy', $client->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this client?');">
-                                    @csrf @method('DELETE')
-                                    <button class="btn btn-sm btn-danger" title="Delete API">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                <form action="{{ route('clients.destroy', $client->id) }}" method="POST" class="delete-form">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
                                 </form>
                             </td>
                         </tr>
@@ -110,6 +108,23 @@
     </div>
 
     <script>
+        document.querySelectorAll('.delete-form').forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Yakin ingin menghapus?',
+                    text: "Data ini tidak bisa dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
         // Autofocus modal
         document.addEventListener('DOMContentLoaded', function () {
             const addClientModal = document.getElementById('addClientModal');
