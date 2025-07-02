@@ -83,15 +83,47 @@
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <div class="card-title">Update Checker</div>
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Update Checker</h5>
             <form method="POST" action="{{ route('settings.check-update') }}">
                 @csrf
-                <button class="btn btn-success">Cek Pembaruan</button>
+                <button class="btn btn-info">Cek Pembaruan</button>
             </form>
         </div>
+
+        <div class="card-body update-body">
+            {{-- Jika ada versi baru --}}
+            @if(session('update_available'))
+                <div class="alert alert-warning">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>Versi {{ session('update_available') }} tersedia!</strong>
+                            <p class="mb-1 text-muted">Silakan update untuk mendapatkan fitur terbaru.</p>
+                        </div>
+                        <form method="POST" action="{{ route('settings.install-update') }}">
+                            @csrf
+                            <button class="btn btn-primary">⬇ Install Update</button>
+                        </form>
+                    </div>
+
+                    @if(session('update_changelog'))
+                        <hr>
+                        <h6>Changelog:</h6>
+                        <pre class="bg-light p-3 rounded">{{ session('update_changelog') }}</pre>
+                    @endif
+                </div>
+            @endif
+
+            {{-- Jika tidak ada update atau status lainnya --}}
+            @if(session('update_status'))
+                <div class="alert alert-info">
+                    {{ session('update_status') }}
+                </div>
+            @endif
+        </div>
     </div>
+
     <!-- Success Toast -->
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
         <div id="feedbackToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
@@ -104,6 +136,15 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const updateBody = document.querySelector('.update-body');
+            const hasUpdate = document.querySelector('.alert.alert-warning');
+            const hasStatus = document.querySelector('.alert.alert-info');
+
+            if (!hasUpdate && !hasStatus && updateBody) {
+                updateBody.style.display = 'none';
+            }
+        });
         document.getElementById('save-settings').addEventListener('click', function(e) {
             e.preventDefault(); // Tambahkan ini untuk cegah reload
 

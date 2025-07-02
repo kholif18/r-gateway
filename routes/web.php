@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/save', [SettingsController::class, 'save']);
     Route::post('/settings/reset', [SettingsController::class, 'reset'])->name('settings.reset');
     Route::post('/settings/check-update', [SettingsController::class, 'checkUpdate'])->name('settings.check-update');
+    Route::post('/settings/install-update', [SettingsController::class, 'installUpdate'])->name('settings.install-update');
 
     // User Profile
     Route::resource('profile', UserController::class)->only(['edit', 'update']);

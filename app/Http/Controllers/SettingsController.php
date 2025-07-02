@@ -2,14 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use ZipArchive;
 use App\Models\Setting;
 use App\Models\ApiClient;
 use Illuminate\Http\Request;
 use App\Services\UpdateChecker;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Artisan;
 
 class SettingsController extends Controller
 {
+    protected $updater;
+
+    public function __construct(UpdateChecker $updater)
+    {
+        $this->updater = $updater;
+    }
+
     protected array $defaults = [
         'timeout' => '30',
         'max-retry' => '3',
@@ -67,17 +78,71 @@ class SettingsController extends Controller
         return is_bool($value) ? ($value ? '1' : '0') : (string) $value;
     }
 
-    public function checkUpdate(UpdateChecker $checker)
+    public function checkUpdate()
     {
-        $result = $checker->check();
+        $update = $this->updater->check();
 
-        return back()->with('toast', [
-            'type' => $result['is_outdated'] ? 'warning' : 'success',
-            'title' => $result['is_outdated'] ? 'Update Tersedia' : 'Up to date',
-            'message' => $result['is_outdated']
-                ? "Versi terbaru: {$result['latest_version']}"
-                : "Anda sudah menggunakan versi terbaru ({$result['latest_version']})"
-        ]);
+        if ($update['is_outdated']) {
+            session()->flash('update_available', $update['latest_version']);
+            session()->flash('update_changelog', $update['changelog']);
+        } else {
+            session()->flash('update_status', 'Aplikasi sudah menggunakan versi terbaru.');
+        }
+
+        return back();
+    }
+
+    public function installUpdate()
+    {
+        try {
+            $update = $this->updater->check();
+
+            if (!$update['is_outdated']) {
+                return back()->with('update_status', 'Tidak ada pembaruan yang tersedia.');
+            }
+
+            $version = $update['latest_version'];
+            $downloadUrl = $update['url'];
+            $zipPath = storage_path("app/update-v{$version}.zip");
+            $tempDir = storage_path("app/update-temp");
+
+            // Unduh ZIP update
+            file_put_contents($zipPath, file_get_contents($downloadUrl));
+
+            // Buat folder sementara jika belum ada
+            if (!File::exists($tempDir)) {
+                File::makeDirectory($tempDir, 0755, true);
+            }
+
+            // Ekstrak ZIP
+            $zip = new ZipArchive;
+            if ($zip->open($zipPath) === TRUE) {
+                $zip->extractTo($tempDir);
+                $zip->close();
+            } else {
+                return back()->with('update_status', 'Gagal mengekstrak file update.');
+            }
+
+            // Cari folder hasil ekstrak
+            $extractedFolder = File::directories($tempDir)[0] ?? null;
+            if ($extractedFolder) {
+                File::copyDirectory($extractedFolder, base_path());
+            } else {
+                return back()->with('update_status', 'Folder hasil ekstrak tidak ditemukan.');
+            }
+
+            // Bersihkan file sementara
+            File::delete($zipPath);
+            File::deleteDirectory($tempDir);
+
+            // Artisan commands
+            Artisan::call('migrate --force');
+            Artisan::call('optimize:clear');
+
+            return back()->with('update_status', "Update ke versi {$version} berhasil diinstal.");
+        } catch (\Exception $e) {
+            return back()->with('update_status', 'Gagal menginstal update: ' . $e->getMessage());
+        }
     }
 
 }
