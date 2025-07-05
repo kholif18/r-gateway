@@ -59,7 +59,7 @@
                     <tbody>
                         @forelse($histories as $history)
                             <tr>
-                                <td>{{ ($history->sent_at)->format('d M Y, H:i') }}</td>
+                                <td>{{ $history->sent_at ? $history->sent_at->format('d M Y, H:i') : '-' }}</td>
                                 <td>{{ \App\Helpers\WhatsappHelper::formatPhoneDisplay($history->phone) }}</td>
                                 <td class="message-preview" title="{{ $history->message }}">
                                     {{ Str::limit($history->message, 60, '...') }}

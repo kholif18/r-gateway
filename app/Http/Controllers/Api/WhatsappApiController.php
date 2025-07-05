@@ -5,9 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Models\ApiClient;
 use App\Models\MessageLog;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use App\Helpers\WhatsappHelper;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use function App\Helpers\Setting\setting; 
 
@@ -24,8 +25,8 @@ class WhatsappApiController extends Controller
     {
         // Validasi input awal
         $validator = Validator::make($request->all(), [
-            'to'     => 'required|string',
-            'msg'    => 'required|string',
+            'phone'     => 'required|string',
+            'message'    => 'required|string',
             'client' => 'required|string',
             'secret' => 'required|string',
         ]);
@@ -34,10 +35,10 @@ class WhatsappApiController extends Controller
             return response()->json(['error' => $validator->errors()->first()], 400);
         }
 
-        $to     = $request->input('to');
-        $msg    = $request->input('msg');
-        $client = $request->input('client');
-        $secret = $request->input('secret');
+        $phone = WhatsappHelper::normalizePhoneNumber($request->input('phone'));
+        $message = $request->input('message');
+        $client  = $request->input('client');
+        $secret  = $request->input('secret');
 
         // Cek client valid
         $clientData = ApiClient::where('client_name', $client)
@@ -61,7 +62,7 @@ class WhatsappApiController extends Controller
         $retryInterval = setting("{$session}_retry-interval", 10);
 
         try {
-            $response = $this->wa->sendMessageToSession($session, $to, $msg, [
+            $response = $this->wa->sendMessageToSession($session, $phone, $message, [
                 'timeout'  => $timeout,
                 'retries'  => $maxRetry,
                 'interval' => $retryInterval,
@@ -70,8 +71,8 @@ class WhatsappApiController extends Controller
             MessageLog::create([
                 'client_name'   => $client,
                 'session_name'  => $session,
-                'phone'         => $to,
-                'message'       => $msg,
+                'phone'         => $phone,
+                'message'       => $message,
                 'status'        => $response?->successful() ? 'success' : 'failed',
                 'response'      => $response?->body(),
                 'sent_at'       => $response?->successful() ? now() : null,
@@ -91,8 +92,8 @@ class WhatsappApiController extends Controller
             MessageLog::create([
                 'client_name'   => $client,
                 'session_name'  => $session,
-                'phone'         => $to,
-                'message'       => $msg,
+                'phone'         => $phone,
+                'message'       => $message,
                 'status'        => 'error',
                 'response'      => $e->getMessage(),
             ]);
