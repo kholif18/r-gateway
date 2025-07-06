@@ -7,7 +7,7 @@
             </a>. All rights reserved.
         </div>
         <div class="text-muted">
-            Version {{ config('app.version') }}
+            Version {{ $app_version }}
         </div>
     </div>
 </footer>

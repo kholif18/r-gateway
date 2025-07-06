@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 
+use App\Models\Setting;
 use Illuminate\Support\Facades\Http;
 
 class UpdateChecker
@@ -10,7 +11,8 @@ class UpdateChecker
 
     public function __construct()
     {
-        $this->currentVersion = config('app.version');
+        // GUNAKAN VERSI YANG DISIMPAN DI DATABASE
+        $this->currentVersion = Setting::get('app_version', config('app.version'));
         $this->updateUrl = 'https://raw.githubusercontent.com/kholif18/r-gateway/main/version.json';
     }
 

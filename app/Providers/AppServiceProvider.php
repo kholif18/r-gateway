@@ -35,5 +35,13 @@ class AppServiceProvider extends ServiceProvider
             ->group(base_path('routes/web.php'));
 
         app(Router::class)->aliasMiddleware('api.token', ApiTokenMiddleware::class);
+
+        if (Schema::hasTable('settings')) {
+            // Ambil dari database jika tabel sudah ada
+            view()->share('app_version', Setting::get('app_version', config('app.version')));
+        } else {
+            // Fallback jika masih fresh install sebelum migrate
+            view()->share('app_version', config('app.version'));
+        }
     }
 }

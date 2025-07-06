@@ -11,25 +11,39 @@ class ReportController extends Controller
 {
     public function index()
     {
-        // Ambil data 30 hari terakhir
-        $thirtyDaysAgo = Carbon::now()->subDays(30);
+        // Ambil 30 hari terakhir
+        $startDate = Carbon::now()->subDays(29)->startOfDay();
 
-        $baseQuery = MessageLog::select(
-                DB::raw("DATE_FORMAT(sent_at, '%d %b %Y') as date"),
-                DB::raw("COUNT(*) as total")
-            )
-            ->where('sent_at', '>=', $thirtyDaysAgo)
-            ->groupBy('date')
-            ->orderByDesc('date');
+        // Ambil data pesan per hari
+        $rawData = MessageLog::selectRaw("DATE(sent_at) as date, COUNT(*) as total")
+            ->where('sent_at', '>=', $startDate)
+            ->groupBy(DB::raw('DATE(sent_at)'))
+            ->orderBy('date', 'asc')
+            ->get();
 
-        // 📊 Data untuk chart (tanpa pagination)
-        $chartData = $baseQuery->get();
-        $chartLabels = $chartData->pluck('date');
-        $chartCounts = $chartData->pluck('total');
+        // Siapkan array lengkap untuk 30 hari (agar hari kosong tetap muncul)
+        $dates = collect();
+        for ($i = 0; $i < 30; $i++) {
+            $date = Carbon::now()->subDays(29 - $i)->toDateString();
+            $dates->put($date, 0);
+        }
 
-        // 📄 Data untuk tabel (dengan pagination)
-        $reports = (clone $baseQuery)->paginate(20);
+        // Isi data dari hasil query
+        foreach ($rawData as $row) {
+            $dates->put($row->date, $row->total);
+        }
 
-        return view('report', compact('reports', 'chartLabels', 'chartCounts', 'chartData'));
+        // Untuk chart
+        $chartLabels = $dates->keys()->toArray();
+        $chartData = $dates->values()->toArray();
+
+        // Untuk tabel laporan (dari hasil asli)
+        $reports = MessageLog::selectRaw("DATE(sent_at) as date, COUNT(*) as total")
+            ->where('sent_at', '>=', $startDate)
+            ->groupBy(DB::raw('DATE(sent_at)'))
+            ->orderByDesc('date')
+            ->paginate(20);
+
+        return view('report', compact('chartLabels', 'chartData', 'reports'));
     }
 }

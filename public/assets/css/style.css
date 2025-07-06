@@ -611,7 +611,9 @@ body {
 }
 
 .message-text {
-    line-height: 1.5;
+    word-wrap: break-word;      /* Untuk memecah kata panjang */
+    overflow-wrap: break-word;  /* Dukungan tambahan */
+    white-space: normal;
 }
 
 .message-status {

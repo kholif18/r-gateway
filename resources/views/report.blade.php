@@ -9,7 +9,7 @@
         </div>
         <div class="card-body">            
             <div class="chart-container mb-4">
-                <canvas id="chartjs-line"></canvas>
+                <canvas id="waChart"></canvas>
             </div>
             <div class="table-container">
                 <table class="history-table">
@@ -65,8 +65,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            
-            const ctx = document.getElementById("chartjs-line").getContext("2d");
+            const ctx = document.getElementById("waChart").getContext("2d");
 
             new Chart(ctx, {
                 type: "line",
@@ -76,12 +75,36 @@
                         label: "WA Message",
                         data: {!! json_encode($chartData) !!},
                         borderColor: "#4a6bdf",
-                        tension: 0.4
+                        backgroundColor: "rgba(74, 107, 223, 0.1)",
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 4,
+                        pointBackgroundColor: "#fff",
+                        pointBorderColor: "#4a6bdf",
+                        pointHoverRadius: 6
                     }]
                 },
-                    options: {
+                options: {
                     responsive: true,
-                    maintainAspectRatio: false // WAJIB agar height dari CSS digunakan
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: "rgba(0,0,0,0.05)"
+                            }
+                        }
+                    }
                 }
             });
         });

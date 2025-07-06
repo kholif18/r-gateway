@@ -54,7 +54,7 @@
                                     </button>
                                 </form>
 
-                                <form action="{{ route('clients.destroy', $client->id) }}" method="POST" class="delete-form">
+                                <form action="{{ route('clients.destroy', $client->id) }}" method="POST" class="d-inline delete-form">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>

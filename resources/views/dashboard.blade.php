@@ -96,7 +96,6 @@
         @else
             <div class="text-center">No messages have been sent yet.</div>
         @endif
-
     </div>
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
         <div id="feedbackToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
