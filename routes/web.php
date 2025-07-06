@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\SettingsController;
@@ -40,8 +41,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
     Route::post('/settings/save', [SettingsController::class, 'save']);
     Route::post('/settings/reset', [SettingsController::class, 'reset'])->name('settings.reset');
-    Route::post('/settings/check-update', [SettingsController::class, 'checkUpdate'])->name('settings.check-update');
-    Route::post('/settings/install-update', [SettingsController::class, 'installUpdate'])->name('settings.install-update');
+
+    Route::get('/check-update', [UpdateController::class, 'check'])->name('update.check');
+    Route::post('/install-update', [UpdateController::class, 'install'])->name('update.install');
 
     // User Profile
     Route::resource('profile', UserController::class)->only(['edit', 'update']);

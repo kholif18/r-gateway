@@ -100,41 +100,13 @@
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">Update Checker</h5>
-            <form method="POST" action="{{ route('settings.check-update') }}">
-                @csrf
-                <button class="btn btn-info">Cek Pembaruan</button>
-            </form>
+            <button id="checkUpdateBtn" class="btn btn-info d-flex align-items-center">
+                <span class="spinner-border spinner-border-sm me-2 d-none" id="checkSpinner" role="status" aria-hidden="true"></span>
+                Check Update
+            </button>
         </div>
-
-        <div class="card-body update-body">
-            {{-- Jika ada versi baru --}}
-            @if(session('update_available'))
-                <div class="alert alert-warning">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <strong>Versi {{ session('update_available') }} tersedia!</strong>
-                            <p class="mb-1 text-muted">Silakan update untuk mendapatkan fitur terbaru.</p>
-                        </div>
-                        <form method="POST" action="{{ route('settings.install-update') }}">
-                            @csrf
-                            <button class="btn btn-primary">⬇ Install Update</button>
-                        </form>
-                    </div>
-
-                    @if(session('update_changelog'))
-                        <hr>
-                        <h6>Changelog:</h6>
-                        <pre class="bg-light p-3 rounded">{{ session('update_changelog') }}</pre>
-                    @endif
-                </div>
-            @endif
-
-            {{-- Jika tidak ada update atau status lainnya --}}
-            @if(session('update_status'))
-                <div class="alert alert-info">
-                    {{ session('update_status') }}
-                </div>
-            @endif
+        <div class="card-body d-none" id="cardBodyContainer">
+            <div id="updateResult"></div>
         </div>
     </div>
 
@@ -150,16 +122,6 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const updateBody = document.querySelector('.update-body');
-            const hasUpdate = document.querySelector('.alert.alert-warning');
-            const hasStatus = document.querySelector('.alert.alert-info');
-
-            if (!hasUpdate && !hasStatus && updateBody) {
-                updateBody.style.display = 'none';
-            }
-        });
-
         document.getElementById('save-settings').addEventListener('click', function(e) {
             e.preventDefault(); // Tambahkan ini untuk cegah reload
 
@@ -252,5 +214,113 @@
                 }
             });
         });
+
+        // Handle update
+        document.addEventListener('DOMContentLoaded', function () {
+        const checkBtn = document.getElementById('checkUpdateBtn');
+        const checkSpinner = document.getElementById('checkSpinner');
+        const updateResult = document.getElementById('updateResult');
+        const cardBody = document.getElementById('cardBodyContainer');
+
+        // Handle Check Update
+        checkBtn.addEventListener('click', function () {
+            resetUI();
+            toggleLoading(true);
+
+            fetch('{{ route('update.check') }}')
+                .then(response => handleFetchResponse(response))
+                .then(data => {
+                    cardBody.classList.remove('d-none');
+                    renderUpdateResult(data);
+                })
+                .catch(error => showError('Gagal memeriksa pembaruan.', error))
+                .finally(() => toggleLoading(false));
+        });
+
+        // Handle Install Update via delegation
+        document.addEventListener('click', function (e) {
+            if (e.target && e.target.id === 'installUpdateBtn') {
+                if (!confirm('Apakah Anda yakin ingin menginstal pembaruan ini sekarang?')) return;
+
+                const installBtn = e.target;
+                const installSpinner = document.getElementById('installSpinner');
+                const installStatus = document.getElementById('installStatus');
+
+                installBtn.disabled = true;
+                installSpinner.classList.remove('d-none');
+                installStatus.classList.remove('d-none', 'text-success', 'text-danger');
+                installStatus.textContent = 'Sedang menginstal pembaruan, mohon tunggu...';
+
+                fetch('{{ route('update.install') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => handleFetchResponse(response))
+                .then(data => {
+                    installSpinner.classList.add('d-none');
+                    installStatus.textContent = data.message;
+
+                    if (data.success) {
+                        installStatus.classList.add('text-success');
+                        setTimeout(() => location.reload(), 3000);
+                    } else {
+                        installStatus.classList.add('text-danger');
+                        installBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    installSpinner.classList.add('d-none');
+                    installStatus.classList.add('text-danger');
+                    installStatus.textContent = 'Terjadi kesalahan saat instalasi.';
+                    installBtn.disabled = false;
+                    console.error('Install error:', error);
+                });
+            }
+        });
+
+        // Helpers
+
+        function resetUI() {
+            cardBody.classList.add('d-none');
+            updateResult.innerHTML = '';
+        }
+
+        function toggleLoading(loading) {
+            checkSpinner.classList.toggle('d-none', !loading);
+            checkBtn.disabled = loading;
+        }
+
+        function handleFetchResponse(response) {
+            if (!response.ok) {
+                throw new Error(`HTTP error ${response.status}`);
+            }
+            return response.json();
+        }
+
+        function renderUpdateResult(data) {
+            if (data.update_available) {
+                updateResult.innerHTML = `
+                    <div class="alert alert-warning mb-3">${data.message}</div>
+                    <button id="installUpdateBtn" class="btn btn-success d-flex align-items-center">
+                        <span class="spinner-border spinner-border-sm me-2 d-none" id="installSpinner" role="status"></span>
+                        Install Update
+                    </button>
+                    <div id="installStatus" class="mt-3 text-muted d-none">Mempersiapkan instalasi...</div>
+                `;
+            } else {
+                updateResult.innerHTML = `
+                    <div class="alert alert-success">${data.message}</div>
+                `;
+            }
+        }
+
+        function showError(userMessage, errorObj) {
+            cardBody.classList.remove('d-none');
+            updateResult.innerHTML = `<div class="alert alert-danger">${userMessage}</div>`;
+            console.error(userMessage, errorObj);
+        }
+    });
     </script>
 @endsection

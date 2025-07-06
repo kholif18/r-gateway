@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
-  "changelog": "Fitur reset password via OTP, toast notifikasi, perbaikan bug.",
-  "url": "https://github.com/kholif18/r-gateway/releases"
+  "version": "1.0.1",
+  "changelog": "Perbaikan updater.",
+  "url": "https://github.com/kholif18/r-gateway/archive/refs/tags/v1.0.1.zip"
 }

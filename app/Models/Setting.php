@@ -29,4 +29,9 @@ class Setting extends Model
     {
         return static::where('key', $key)->value('value') ?? $default;
     }
+
+    public static function set($key, $value)
+    {
+        return static::updateOrCreate(['key' => $key], ['value' => $value]);
+    }
 }
