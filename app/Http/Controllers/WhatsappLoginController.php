@@ -52,27 +52,6 @@ class WhatsappLoginController extends Controller
         return response()->json($response->json(), $response->status());
     }
 
-    public function getQrImage()
-    {
-        $session = $this->getSession();
-
-        if (!$session) {
-            return response()->json(['error' => 'Unauthorized or username missing'], 403);
-        }
-
-        $status = $this->whatsapp->checkSessionStatus($session);
-
-        if ($status && strtolower($status['status']) === 'connected') {
-            return response()->noContent(); // Sudah login, tidak perlu QR
-        }
-
-        $qrResponse = $this->whatsapp->getQrCode($session);
-
-        return $qrResponse && $qrResponse->ok()
-            ? response($qrResponse->body(), 200)->header('Content-Type', 'image/png')
-            : response()->json(['error' => 'QR tidak tersedia'], 404);
-    }
-
     public function status()
     {
         $session = $this->getSession();

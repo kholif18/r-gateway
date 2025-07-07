@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\WhatsappApiController;
 Route::middleware(ApiTokenMiddleware::class, 'rate.client')->group(function () {
     Route::get('/send', [WhatsappApiController::class, 'send']);
     Route::post('/send', [WhatsappApiController::class, 'send']);
+    Route::post('/wa/send-media', [WhatsappApiController::class, 'sendMedia']);
+    Route::post('/wa/send-group', [WhatsappApiController::class, 'sendGroup']);
     Route::get('/logs', [MessageLogController::class, 'api']);
     Route::post('/logs', [MessageLogController::class, 'store']);
 });

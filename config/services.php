@@ -38,5 +38,6 @@ return [
     'whatsapp' => [
         'url' => env('WA_BACKEND_URL'),
         'key' => env('API_SECRET'),
+        'socket_url' => env('WHATSAPP_SOCKET_URL'),
     ],
 ];

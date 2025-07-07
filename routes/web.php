@@ -20,7 +20,7 @@ Route::middleware('auth')->group(function () {
 
     // WhatsApp Message
     Route::get('/whatsapp/send-message', [MessageController::class, 'index'])->name('whatsapp.message');
-    Route::post('/whatsapp/send-message', [MessageController::class, 'send'])->name('whatsapp.message.send');
+    Route::post('/whatsapp/send-message', [MessageController::class, 'send'])->name('message.send');
 
     // WhatsApp Session/Login
     Route::prefix('whatsapp')->group(function () {
