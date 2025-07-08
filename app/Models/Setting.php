@@ -72,10 +72,13 @@ class Setting extends Model
     /**
      * Bangun cache key
      */
-    protected static function cacheKey(int $userId, string $key): string
+    protected static function cacheKey(?int $userId, string $key): string
     {
-        return "setting.{$userId}.{$key}";
+        return $userId === null
+            ? "setting.global.{$key}"
+            : "setting.{$userId}.{$key}";
     }
+
 
     // Dalam model Setting
     public static function getGlobal(string $key, $default = null)
