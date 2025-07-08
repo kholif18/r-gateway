@@ -107,7 +107,7 @@
         @endif
     </div>
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
-        <div id="feedbackToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="feedbackToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div id="toastHeader" class="toast-header">
                 <strong class="me-auto" id="toastTitle"></strong>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
@@ -115,19 +115,6 @@
             <div class="toast-body" id="toastBody"></div>
         </div>
     </div>
-
-    @if ($update['is_outdated'])
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                showToast(
-                    'Pembaruan Tersedia',
-                    `Versi baru <strong>{{ $update['latest_version'] }}</strong> tersedia.<br>{{ $update['changelog'] }}<br>
-                    <a href='{{ $update['url'] }}' target='_blank' class='btn btn-sm btn-light mt-2'>Lihat Update</a>`,
-                    'warning'
-                );
-            });
-        </script>
-    @endif
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -181,18 +168,36 @@
                 const toastEl = document.getElementById('feedbackToast');
                 const toast = new bootstrap.Toast(toastEl);
 
-                document.getElementById('toastTitle').innerText = title;
-                document.getElementById('toastBody').innerHTML = message;
-
+                const titleEl = document.getElementById('toastTitle');
+                const bodyEl = document.getElementById('toastBody');
                 const header = document.getElementById('toastHeader');
+
                 header.className = 'toast-header';
-                
-                if (type === 'success') header.classList.add('bg-success', 'text-white');
-                else if (type === 'error') header.classList.add('bg-danger', 'text-white');
-                else if (type === 'warning') header.classList.add('bg-warning', 'text-dark');
+                toastEl.classList.remove('bg-success', 'bg-danger');
+
+                titleEl.innerText = title;
+                bodyEl.innerHTML = message;
+
+                if (type === 'success') {
+                    header.classList.add('bg-success', 'text-white');
+                    toastEl.classList.add('bg-success', 'text-white');
+                } else {
+                    header.classList.add('bg-warning', 'text-dark');
+                    toastEl.classList.add('bg-warning', 'text-dark');
+                }
 
                 toast.show();
             }
+
+            @if ($showUpdateToast)
+                showToast(
+                    'Pembaruan Tersedia',
+                    `{!! 'Versi baru <strong>' . e($update['latest_version']) . '</strong> tersedia.<br>' .
+                    (is_array($update['changelog']) ? implode('<br>', $update['changelog']) : e($update['changelog'])) .
+                    '<br><a href="' . e($update['release_page'] ?? $update['url']) . '" target="_blank" class="btn btn-sm btn-light mt-2">Lihat Update</a>' !!}`,
+                    'warning'
+                );
+            @endif
         });
     </script>
 @endsection

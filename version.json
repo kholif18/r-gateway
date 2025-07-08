@@ -8,7 +8,10 @@
     "Tersedia untuk tes pesan dan api",
     "- Fix paginate",
     "- fix status message dashboard",
-    "- fix user auth"
+    "- fix user auth",
+    "- fix notifikasi update available",
+    "- fix setting auth"
   ],
-  "url": "https://github.com/kholif18/r-gateway/archive/refs/tags/v1.1.0.zip"
+  "url": "https://github.com/kholif18/r-gateway/archive/refs/tags/v1.1.0.zip",
+  "release_page": "https://github.com/kholif18/r-gateway/releases/tag/v1.1.0"
 }

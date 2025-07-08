@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
-            $table->string('key')->unique();
+            $table->string('key');
             $table->text('value')->nullable();
             $table->timestamps();
+            $table->unique(['user_id', 'key']);
         });
     }
 

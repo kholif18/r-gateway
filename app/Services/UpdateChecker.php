@@ -34,10 +34,11 @@ class UpdateChecker
         }
 
         return [
-            'is_outdated' => false,
-            'latest_version' => $this->currentVersion,
-            'changelog' => '',
-            'url' => null,
+            'is_outdated'     => false,
+            'latest_version'  => $this->currentVersion,
+            'changelog'       => '',
+            'url'             => null,
+            'release_page'    => $latest['release_page'] ?? null,
         ];
     }
 }

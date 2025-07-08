@@ -57,7 +57,13 @@ class MessageController extends Controller
                         'caption'   => 'nullable|string',
                     ]);
                     $number = WhatsappHelper::normalizePhoneNumber($request->number);
+                    $caption = $request->caption ?? '[Media without caption]';
+                    
                     $result = $this->wa->sendMedia($session, $number, $request->file_url, $request->caption);
+                    // Siapkan untuk log
+                    $request->merge([
+                        'caption' => $caption,
+                    ]);
                     break;
 
                 case 'file-upload':
@@ -68,6 +74,7 @@ class MessageController extends Controller
                     ]);
 
                     $number = WhatsappHelper::normalizePhoneNumber($request->number);
+                    $caption = $request->caption ?? '[Media without caption]';
 
                     // Buat folder jika belum ada
                     if (!Storage::disk('public')->exists('temp-uploads')) {
@@ -89,6 +96,9 @@ class MessageController extends Controller
                     $originalName = $request->file('file')->getClientOriginalName();
                     $result = $this->wa->sendLocalMedia($session, $number, $absolutePath, $request->caption, $originalName);
 
+                    $request->merge([
+                        'caption' => $caption,
+                    ]);
                     // Hapus file setelah terkirim
                     if (file_exists($absolutePath)) {
                         unlink($absolutePath);

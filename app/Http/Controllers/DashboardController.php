@@ -13,12 +13,20 @@ class DashboardController extends Controller
     
     public function index(UpdateChecker $checker)
     {
+        $update = $checker->check();
         $userId = Auth::id();
+        $cacheKey = "update_shown_{$userId}_" . now()->toDateString();
+
+        $showUpdateToast = false;
+        if ($update['is_outdated'] && !cache()->has($cacheKey)) {
+            cache()->put($cacheKey, true, now()->endOfDay());
+            $showUpdateToast = true;
+        }
+
         $clientNames = \App\Models\ApiClient::where('user_id', $userId)
             ->pluck('client_name')
             ->toArray();
 
-        $update = $checker->check();
         $today = Carbon::today();
         $yesterday = Carbon::yesterday();
 
@@ -58,8 +66,8 @@ class DashboardController extends Controller
             ->latest('sent_at')
             ->first();
 
-
         return view('dashboard', compact(
+            'showUpdateToast',
             'sentToday',
             'sentTodayGrowth',
             'growthDirection',

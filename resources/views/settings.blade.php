@@ -131,10 +131,16 @@
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
                 }
             })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => { throw new Error(err.message || 'Gagal menyimpan') });
+                }
+                return res.json();
+            })
             .then(data => {
                 showToast('Success', 'Settings saved successfully!', 'success');
             })
