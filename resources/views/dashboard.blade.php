@@ -194,7 +194,7 @@
                     'Pembaruan Tersedia',
                     `{!! 'Versi baru <strong>' . e($update['latest_version']) . '</strong> tersedia.<br>' .
                     (is_array($update['changelog']) ? implode('<br>', $update['changelog']) : e($update['changelog'])) .
-                    '<br><a href="' . e($update['release_page'] ?? $update['url']) . '" target="_blank" class="btn btn-sm btn-light mt-2">Lihat Update</a>' !!}`,
+                    '<br><a href="' . e($update['release_page']) . '" target="_blank" class="btn btn-sm btn-light mt-2">Lihat Update</a>' !!}`,
                     'warning'
                 );
             @endif
