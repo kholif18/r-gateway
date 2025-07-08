@@ -26,19 +26,22 @@ class UpdateChecker
             $isOutdated = version_compare($this->currentVersion, $latest['version'], '<');
 
             return [
-                'is_outdated' => $isOutdated,
+                'is_outdated'    => $isOutdated,
                 'latest_version' => $latest['version'],
-                'changelog' => $latest['changelog'] ?? '',
-                'url' => $latest['url'] ?? null,
+                'changelog'      => $latest['changelog'] ?? '',
+                'url'            => $latest['url'] ?? null,
+                'release_page'   => $latest['release_page'] ?? null,
             ];
         }
 
+        // fallback jika gagal mengambil dari remote
         return [
-            'is_outdated'     => false,
-            'latest_version'  => $this->currentVersion,
-            'changelog'       => '',
-            'url'             => null,
-            'release_page'    => $latest['release_page'] ?? null,
+            'is_outdated'    => false,
+            'latest_version' => $this->currentVersion,
+            'changelog'      => '',
+            'url'            => null,
+            'release_page'   => null,
         ];
     }
+
 }
