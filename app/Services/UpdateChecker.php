@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\Setting;
@@ -11,7 +12,7 @@ class UpdateChecker
 
     public function __construct()
     {
-        // GUNAKAN VERSI YANG DISIMPAN DI DATABASE
+        // Ambil versi dari database (fallback ke config jika tidak ada)
         $this->currentVersion = Setting::get('app_version', config('app.version'));
         $this->updateUrl = 'https://raw.githubusercontent.com/kholif18/r-gateway/main/version.json';
     }
@@ -23,7 +24,11 @@ class UpdateChecker
         if ($response->ok()) {
             $latest = $response->json();
 
-            $isOutdated = version_compare($this->currentVersion, $latest['version'], '<');
+            // Normalisasi versi agar 'v1.1.4' == '1.1.4'
+            $localVersion  = ltrim(strtolower($this->currentVersion), 'v');
+            $remoteVersion = ltrim(strtolower($latest['version']), 'v');
+
+            $isOutdated = version_compare($localVersion, $remoteVersion, '<');
 
             return [
                 'is_outdated'    => $isOutdated,
@@ -43,5 +48,4 @@ class UpdateChecker
             'release_page'   => null,
         ];
     }
-
 }
