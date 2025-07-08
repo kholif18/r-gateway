@@ -3,6 +3,7 @@
 namespace App\Helpers\Setting;
 
 use App\Models\Setting;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -14,8 +15,14 @@ use Illuminate\Support\Facades\Cache;
  */
 function setting(string $key, $default = null)
 {
-    return Cache::rememberForever("setting.$key", function () use ($key, $default) {
-        $setting = Setting::where('key', $key)->first();
+    $userId = Auth::id();
+    if (!$userId) return $default;
+
+    return Cache::rememberForever("setting.{$userId}.{$key}", function () use ($key, $default, $userId) {
+        $setting = Setting::where('user_id', $userId)
+            ->where('key', $key)
+            ->first();
+
         return $setting ? $setting->value : $default;
     });
 }
@@ -39,7 +46,12 @@ function setting_bool(string $key, bool $default = false): bool
  */
 function settings_all(): array
 {
-    return Cache::rememberForever("settings.all", function () {
-        return Setting::pluck('value', 'key')->toArray();
+    $userId = Auth::id();
+    if (!$userId) return [];
+
+    return Cache::rememberForever("settings.all.{$userId}", function () use ($userId) {
+        return Setting::where('user_id', $userId)
+            ->pluck('value', 'key')
+            ->toArray();
     });
 }

@@ -55,8 +55,14 @@
                 <tbody>
                     @forelse ($logs as $log)
                         <tr>
-                            <td>{{ $log->client_name }}</td>
-                            <td>{{ \App\Helpers\WhatsappHelper::formatPhoneDisplay($log->phone) }}</td>
+                            <td>{{ Str::limit($log->client_name, 10) }}</td>
+                            <td>
+                                @if(Str::startsWith($log->phone, ['[GROUP]', '[BULK]']))
+                                    {{ Str::limit($log->phone, 20) }}
+                                @else
+                                    {{ Str::limit(\App\Helpers\WhatsappHelper::formatPhoneDisplay($log->phone), 20) }}
+                                @endif
+                            </td>
                             <td>{{ Str::limit($log->message, 50) }}</td>
                             <td>
                                 <span class="badge 
@@ -97,34 +103,8 @@
                 </form>
 
                 {{-- Pagination --}}
-                <div class="pagination">
-                    {{-- Previous --}}
-                    @if ($logs->onFirstPage())
-                        <button class="page-btn" disabled><i class="fas fa-chevron-left"></i></button>
-                    @else
-                        <a href="{{ $logs->previousPageUrl() }}" class="page-btn"><i class="fas fa-chevron-left"></i></a>
-                    @endif
-
-                    {{-- Page numbers --}}
-                    @foreach ($logs->getUrlRange(1, $logs->lastPage()) as $page => $url)
-                        @if ($page == $logs->currentPage())
-                            <span class="page-btn active">{{ $page }}</span>
-                        @else
-                            <a href="{{ $url }}" class="page-btn">{{ $page }}</a>
-                        @endif
-                    @endforeach
-
-                    {{-- Next --}}
-                    @if ($logs->hasMorePages())
-                        <a href="{{ $logs->nextPageUrl() }}" class="page-btn"><i class="fas fa-chevron-right"></i></a>
-                    @else
-                        <button class="page-btn" disabled><i class="fas fa-chevron-right"></i></button>
-                    @endif
-
-                    {{-- Info --}}
-                    <span class="page-info">
-                        Page {{ $logs->currentPage() }} of {{ $logs->lastPage() }}
-                    </span>
+                <div class="pagination overflow-x-auto whitespace-nowrap">
+                    <x-pagination :paginator="$logs" />
                 </div>
             </div>
         </div>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MessageLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class HistoryController extends Controller
@@ -62,6 +63,8 @@ class HistoryController extends Controller
      */
     protected function applyFilters($query, Request $request)
     {
+        $query->where('user_id', Auth::id()); // ⬅️ Tambahkan ini
+
         if ($request->filled('from')) {
             $query->whereDate('sent_at', '>=', $request->from);
         }
@@ -77,10 +80,11 @@ class HistoryController extends Controller
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('phone', 'like', '%' . $request->search . '%')
-                  ->orWhere('message', 'like', '%' . $request->search . '%');
+                ->orWhere('message', 'like', '%' . $request->search . '%');
             });
         }
 
         return $query;
     }
+
 }

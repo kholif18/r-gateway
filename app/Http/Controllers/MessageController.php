@@ -37,7 +37,8 @@ class MessageController extends Controller
 
         $type = $request->input('type');
 
-        $uploadDir = 'temp-uploads';
+        $number = '-';
+
         try {
             switch ($type) {
                 case 'text':
@@ -61,34 +62,34 @@ class MessageController extends Controller
 
                 case 'file-upload':
                     $request->validate([
-                        'number' => 'required|string',
-                        'file'   => 'required|file|max:51200', // 50MB
+                        'number'  => 'required|string',
+                        'file'    => 'required|file|max:51200', // 50MB
                         'caption' => 'nullable|string',
                     ]);
 
                     $number = WhatsappHelper::normalizePhoneNumber($request->number);
 
-                    // PASTIKAN folder ada sebelum menyimpan
-                    if (!Storage::exists($uploadDir)) {
-                        Storage::makeDirectory($uploadDir);
-                        Log::info("Folder $uploadDir dibuat.");
+                    // Buat folder jika belum ada
+                    if (!Storage::disk('public')->exists('temp-uploads')) {
+                        Storage::disk('public')->makeDirectory('temp-uploads');
                     }
 
-                    // Cek apakah file ada sebelum store
-                    if (!$request->hasFile('file')) {
-                        throw new \Exception("File tidak ditemukan dalam permintaan.");
-                    }
+                    // Simpan file ke disk public/temp-uploads
+                    $path = $request->file('file')->store('temp-uploads', 'public');
 
-                    $filePath = $request->file('file')->store($uploadDir);
-                    $absolutePath = storage_path('app/' . $filePath);
+                    // Ambil path absolut
+                    $absolutePath = storage_path('app/public/' . $path);
 
+                    // Cek apakah file benar-benar ada
                     if (!file_exists($absolutePath)) {
                         throw new \Exception("File gagal disimpan: $absolutePath");
                     }
 
-                    $result = $this->wa->sendLocalMedia($session, $number, $absolutePath, $request->caption);
+                    // Kirim media lokal
+                    $originalName = $request->file('file')->getClientOriginalName();
+                    $result = $this->wa->sendLocalMedia($session, $number, $absolutePath, $request->caption, $originalName);
 
-                    // Hapus file temp jika sudah ada
+                    // Hapus file setelah terkirim
                     if (file_exists($absolutePath)) {
                         unlink($absolutePath);
                     } else {
@@ -101,23 +102,71 @@ class MessageController extends Controller
                         'group-name' => 'required|string',
                         'message'    => 'required|string',
                     ]);
-                    $result = $this->wa->sendGroupMessage($session, $request->input('group-name'), $request->message);
+
+                    $groupName = $request->input('group-name');
+                    $number = '[GROUP] ' . $groupName; // ini untuk pencatatan log
+                    $result = $this->wa->sendGroupMessage($session, $groupName, $request->message);
+
+                    $request->merge([
+                        'number' => $number, // agar bisa digunakan di log
+                    ]);
+
+                    break;
+
+                case 'bulk':
+                    $request->validate([
+                        'phones'  => 'required|string', // input dari <textarea>
+                        'message' => 'required|string',
+                    ]);
+
+                    // 1. Parsing dan normalisasi nomor
+                    $rawPhones = preg_split('/[\s,]+/', $request->input('phones'), -1, PREG_SPLIT_NO_EMPTY);
+
+                    $phones = collect($rawPhones)
+                        ->map(fn($p) => WhatsappHelper::normalizePhoneNumber(trim($p)))
+                        ->filter() // buang yang kosong/null
+                        ->unique() // hilangkan duplikat
+                        ->values()
+                        ->all();
+
+                    if (empty($phones)) {
+                        return back()->with('error', 'Tidak ada nomor valid ditemukan.');
+                    }
+
+                    // 2. Kirim pesan
+                    $result = $this->wa->sendBulkMessage($session, $phones, $request->message);
+
+                    $request->merge([
+                        'number' => implode(', ', $phones)
+                    ]);
+
+                    $body    = is_array($result['body']) 
+                        ? json_encode($result['body'], JSON_UNESCAPED_UNICODE)
+                        : (is_string($result['body']) ? $result['body'] : json_encode((array) $result['body']));
+
+                    $success = $result['success'];
+
                     break;
 
                 default:
                     return back()->with('error', 'Tipe pengiriman tidak dikenali.');
             }
 
-            if (is_array($result) && isset($result['success'])) {
-                $success = $result['success'];
-                $body = $result['body'];
-            } else {
-                $success = $result === true;
-                $body = is_string($result) ? $result : json_encode($result);
+            // Setelah switch-case selesai
+            if (!isset($success)) {
+                $success = $result['success'] ?? false;
             }
+
+            if (!isset($body)) {
+                $body = is_array($result['body']) 
+                    ? json_encode($result['body'], JSON_UNESCAPED_UNICODE)
+                    : (is_string($result['body']) ? $result['body'] : json_encode((array) $result['body']));
+            }
+
 
             // Simpan log jika ada nomor
             MessageLog::create([
+                'user_id'      => Auth::id(),
                 'client_name'  => $client,
                 'session_name' => $session,
                 'phone'        => $request->input('number') ?? '-',
@@ -136,6 +185,7 @@ class MessageController extends Controller
             Log::error("Gagal mengirim pesan: " . $e->getMessage());
 
             MessageLog::create([
+                'user_id'      => Auth::id(),
                 'client_name'  => $client,
                 'session_name' => $session,
                 'phone'        => $request->input('number') ?? '-',
@@ -147,18 +197,5 @@ class MessageController extends Controller
 
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-    }
-
-    protected function logMessage($client, $session, $target, $message, $success, $response)
-    {
-        MessageLog::create([
-            'client_name'   => $client,
-            'session_name'  => $session,
-            'phone'         => $target,
-            'message'       => $message,
-            'status'        => $success ? 'success' : 'failed',
-            'response'      => $response,
-            'sent_at'       => now(),
-        ]);
     }
 }

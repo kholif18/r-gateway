@@ -8,6 +8,7 @@ use App\Helpers\WhatsappHelper;
 class MessageLog extends Model
 {
     protected $fillable = [
+        'user_id',
         'client_name',
         'session_name',
         'phone',
@@ -21,13 +22,10 @@ class MessageLog extends Model
         'sent_at' => 'datetime',
     ];
 
-    public $timestamps = false;
-
-    /**
-     * 🔁 Mutator untuk otomatis normalisasi nomor telepon
-     */
-    public function setPhoneAttribute($value)
+    public function user()
     {
-        $this->attributes['phone'] = WhatsappHelper::normalizePhoneNumber($value);
+        return $this->belongsTo(User::class);
     }
+
+    public $timestamps = false;
 }

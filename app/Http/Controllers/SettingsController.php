@@ -7,6 +7,7 @@ use App\Models\Setting;
 use App\Models\ApiClient;
 use Illuminate\Http\Request;
 use App\Services\UpdateChecker;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
@@ -32,7 +33,8 @@ class SettingsController extends Controller
 
     public function index()
     {
-        $settings = Setting::pluck('value', 'key')->toArray();
+        $userId = Auth::id();
+        $settings = Setting::where('user_id', $userId)->pluck('value', 'key')->toArray();
         return view('settings', compact('settings'));
     }
 
@@ -43,12 +45,13 @@ class SettingsController extends Controller
             'max-retry' => 'required|numeric|min:0|max:10',
             'retry-interval' => 'required|numeric|min:5|max:60',
             'max-queue' => 'required|numeric|min:10|max:1000',
-            // rate_limit_* bisa divalidasi juga kalau dibutuhkan
         ]);
+
+        $userId = Auth::id();
 
         foreach ($request->except('_token') as $key => $value) {
             Setting::updateOrCreate(
-                ['key' => $key],
+                ['user_id' => $userId, 'key' => $key],
                 ['value' => self::castToString($value)]
             );
         }
@@ -58,13 +61,20 @@ class SettingsController extends Controller
 
     public function reset()
     {
+        $userId = Auth::id();
+
         foreach ($this->defaults as $key => $value) {
-            Setting::updateOrCreate(['key' => $key], ['value' => $value]);
+            Setting::updateOrCreate(
+                ['user_id' => $userId, 'key' => $key],
+                ['value' => $value]
+            );
         }
 
-        // Kosongkan rate limit cache
-        foreach (ApiClient::all() as $client) {
-            Cache::forget("rate_limit:{$client->session_name}");
+        // Kosongkan cache rate limit hanya milik session user login
+        $clientSessions = ApiClient::where('user_id', $userId)->pluck('session_name');
+
+        foreach ($clientSessions as $session) {
+            Cache::forget("rate_limit:{$session}");
         }
 
         return response()->json(['status' => 'reset']);

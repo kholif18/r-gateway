@@ -10,32 +10,54 @@ use App\Services\UpdateChecker;
 
 class DashboardController extends Controller
 {
+    
     public function index(UpdateChecker $checker)
     {
+        $userId = Auth::id();
+        $clientNames = \App\Models\ApiClient::where('user_id', $userId)
+            ->pluck('client_name')
+            ->toArray();
+
         $update = $checker->check();
         $today = Carbon::today();
         $yesterday = Carbon::yesterday();
 
-        $sentToday = MessageLog::whereDate('sent_at', $today)->count();
-        $sentYesterday = MessageLog::whereDate('sent_at', $yesterday)->count();
+        $sentToday = MessageLog::where('user_id', $userId)
+            ->whereDate('sent_at', $today)
+            ->count();
+
+        $sentYesterday = MessageLog::where('user_id', $userId)
+            ->whereDate('sent_at', $yesterday)
+            ->count();
 
         $sentTodayGrowth = $sentYesterday > 0
             ? round((($sentToday - $sentYesterday) / $sentYesterday) * 100)
             : ($sentToday > 0 ? 100 : 0);
 
         $growthDirection = $sentToday > $sentYesterday ? 'up'
-                          : ($sentToday < $sentYesterday ? 'down' : 'right');
+                        : ($sentToday < $sentYesterday ? 'down' : 'right');
 
-        $totalMessages = MessageLog::count();
-        $successCount = MessageLog::where('status', 'success')->count();
+        $totalMessages = MessageLog::where('user_id', $userId)->count();
+        $successCount = MessageLog::where('user_id', $userId)
+            ->where('status', 'success')
+            ->count();
+
         $successRate = $totalMessages > 0
             ? round(($successCount / $totalMessages) * 100)
             : 0;
 
-        ['status' => $successStatus, 'badge' => $successBadge, 'icon' => $successIcon] =
-            $this->determineSuccessIndicator($successRate);
+        [
+            'status' => $successStatus,
+            'badge' => $successBadge,
+            'icon' => $successIcon,
+            'bgGradient' => $successBackground,
+        ] = $this->determineSuccessIndicator($successRate);
 
-        $lastMessage = MessageLog::latest('sent_at')->first();
+        $lastMessage = MessageLog::where('user_id', $userId)
+            ->whereNotNull('sent_at')
+            ->latest('sent_at')
+            ->first();
+
 
         return view('dashboard', compact(
             'sentToday',
@@ -46,9 +68,11 @@ class DashboardController extends Controller
             'lastMessage',
             'successStatus',
             'successBadge',
-            'successIcon'
+            'successIcon',
+            'successBackground'
         ));
     }
+
 
     public function status()
     {
@@ -68,12 +92,14 @@ class DashboardController extends Controller
                 'status' => 'Stable',
                 'badge' => 'status-badge-connected',
                 'icon' => 'fa-chart-line',
+                'bgGradient' => 'linear-gradient(135deg, #28a745, #054a43)',
             ];
         } elseif ($rate >= 70) {
             return [
                 'status' => 'Warning',
                 'badge' => 'status-badge-warning',
                 'icon' => 'fa-exclamation-triangle',
+                'bgGradient' => 'linear-gradient(135deg, #ffc107, #856404)',
             ];
         }
 
@@ -81,6 +107,7 @@ class DashboardController extends Controller
             'status' => 'Critical',
             'badge' => 'status-badge-disconnected',
             'icon' => 'fa-times-circle',
+            'bgGradient' => 'linear-gradient(135deg, #dc3545, #721c24)',
         ];
     }
 }

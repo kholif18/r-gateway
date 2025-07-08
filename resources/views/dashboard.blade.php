@@ -31,7 +31,7 @@
         </div>
         
         <!-- Statistik Lainnya Card -->
-        <div class="status-card" style="background: linear-gradient(135deg, var(--secondary), #054a43);">
+        <div class="status-card" style="background: {{ $successBackground }};">
             <div class="card-icon">
                 <i class="fas fa-user-check"></i>
             </div>
@@ -88,8 +88,17 @@
                 <div class="message-text">
                     {{ $lastMessage->message }}
                 </div>
-                <div class="message-status status-delivered">
-                    <i class="fas fa-check-circle"></i> {{ ucfirst($lastMessage->status) }}
+                @php
+                    $status = strtolower($lastMessage->status);
+                    [$statusClass, $icon] = match($status) {
+                        'failed' => ['status-failed', 'fas fa-times-circle'],
+                        'pending' => ['status-pending', 'fas fa-clock'],
+                        default => ['status-delivered', 'fas fa-check-circle'],
+                    };
+                @endphp
+
+                <div class="message-status {{ $statusClass }}">
+                    <i class="{{ $icon }}"></i> {{ ucfirst($status) }}
                 </div>
             </div>
         </div>
@@ -184,7 +193,6 @@
 
                 toast.show();
             }
-
         });
     </script>
 @endsection

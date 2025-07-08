@@ -50,17 +50,23 @@
                 <table class="history-table">
                     <thead>
                         <tr>
-                            <th style="width: 200px">Date & Time</th>
-                            <th>to</th>
-                            <th>Message</th>
-                            <th style="width: 150px">Status</th>
+                            <th style="width: 20%">Date & Time</th>
+                            <th style="width: 20%">to</th>
+                            <th style="width: 50%">Message</th>
+                            <th style="width: 10%">Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($histories as $history)
                             <tr>
                                 <td>{{ $history->sent_at ? $history->sent_at->format('d M Y, H:i') : '-' }}</td>
-                                <td>{{ \App\Helpers\WhatsappHelper::formatPhoneDisplay($history->phone) }}</td>
+                                <td>
+                                    @if(Str::startsWith($history->phone, ['[GROUP]', '[BULK]']))
+                                        {{ Str::limit($history->phone, 20) }}
+                                    @else
+                                        {{ Str::limit(\App\Helpers\WhatsappHelper::formatPhoneDisplay($history->phone), 20) }}
+                                    @endif
+                                </td>
                                 <td class="message-preview" title="{{ $history->message }}">
                                     {{ Str::limit($history->message, 60, '...') }}
                                 </td>
@@ -104,34 +110,8 @@
                 </form>
 
                 {{-- Pagination --}}
-                <div class="pagination">
-                    {{-- Previous --}}
-                    @if ($histories->onFirstPage())
-                        <button class="page-btn" disabled><i class="fas fa-chevron-left"></i></button>
-                    @else
-                        <a href="{{ $histories->previousPageUrl() }}" class="page-btn"><i class="fas fa-chevron-left"></i></a>
-                    @endif
-
-                    {{-- Page numbers --}}
-                    @foreach ($histories->getUrlRange(1, $histories->lastPage()) as $page => $url)
-                        @if ($page == $histories->currentPage())
-                            <span class="page-btn active">{{ $page }}</span>
-                        @else
-                            <a href="{{ $url }}" class="page-btn">{{ $page }}</a>
-                        @endif
-                    @endforeach
-
-                    {{-- Next --}}
-                    @if ($histories->hasMorePages())
-                        <a href="{{ $histories->nextPageUrl() }}" class="page-btn"><i class="fas fa-chevron-right"></i></a>
-                    @else
-                        <button class="page-btn" disabled><i class="fas fa-chevron-right"></i></button>
-                    @endif
-
-                    {{-- Info --}}
-                    <span class="page-info">
-                        Page {{ $histories->currentPage() }} of {{ $histories->lastPage() }}
-                    </span>
+                <div class="pagination overflow-x-auto whitespace-nowrap">
+                    <x-pagination :paginator="$histories" />
                 </div>
             </div>
         </div>

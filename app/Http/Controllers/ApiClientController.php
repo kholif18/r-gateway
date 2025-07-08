@@ -13,7 +13,7 @@ class ApiClientController extends Controller
 {
     public function index()
     {
-        $clients = ApiClient::all();
+        $clients = ApiClient::where('user_id', Auth::id())->get();
         return view('api-clients', compact('clients'));
     }
 
@@ -48,10 +48,11 @@ class ApiClientController extends Controller
         }
 
         ApiClient::create([
-            'client_name'   => $request->client_name,
-            'api_token'     => Str::uuid()->toString(),
-            'session_name'  => Auth::user()->username,
-            'is_active'     => true,
+            'user_id'      => Auth::id(), // ⬅️ Simpan ID pembuatnya
+            'client_name'  => $request->client_name,
+            'api_token'    => Str::uuid()->toString(),
+            'session_name' => Auth::user()->username,
+            'is_active'    => true,
         ]);
 
         return redirect()->route('clients.index')->with('success', 'Client berhasil ditambahkan.');
@@ -59,18 +60,30 @@ class ApiClientController extends Controller
 
     public function toggle(ApiClient $client)
     {
+        if ($client->user_id !== Auth::id()) {
+            abort(403); // 🔒 Hindari manipulasi milik user lain
+        }
+
         $client->update(['is_active' => !$client->is_active]);
         return back()->with('success', 'Status client diperbarui.');
     }
 
     public function regenerate(ApiClient $client)
     {
+        if ($client->user_id !== Auth::id()) {
+            abort(403);
+        }
+
         $client->update(['api_token' => Str::uuid()->toString()]);
         return back()->with('success', 'Token baru berhasil dibuat.');
     }
 
     public function destroy(ApiClient $client)
     {
+        if ($client->user_id !== Auth::id()) {
+            abort(403);
+        }
+
         $client->delete();
 
         Swal::success([

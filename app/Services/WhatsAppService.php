@@ -122,7 +122,7 @@ class WhatsAppService
         }
     }
 
-    public function sendLocalMedia(string $session, string $phone, string $filePath, ?string $caption = null): array
+    public function sendLocalMedia(string $session, string $phone, string $filePath, ?string $caption = null, ?string $originalName = null): array
     {
         try {
             if (!file_exists($filePath)) {
@@ -139,8 +139,8 @@ class WhatsAppService
             ])->attach(
                 'file',           // Nama field file di backend
                 file_get_contents($filePath),
-                basename($filePath)
-            )->post("{$this->baseUrl}/session/send-media", [
+                $originalName ?? basename($filePath)
+            )->post("{$this->baseUrl}/session/send-media-upload", [
                 'session' => $session,
                 'phone'   => $phone,
                 'caption' => $caption,
@@ -151,6 +151,7 @@ class WhatsAppService
                 'phone'   => $phone,
                 'file'    => $filePath,
                 'caption' => $caption,
+                'originalName' => $originalName,
             ]);
 
             if (!$response->successful()) {
@@ -216,7 +217,50 @@ class WhatsAppService
         }
     }
 
-    
+    public function sendBulkMessage(string $session, array $phones, string $message): array
+    {
+        try {
+            // Susun ulang array agar sesuai dengan backend
+            $messages = array_map(function ($phone) use ($message) {
+                return [
+                    'phone'   => $phone,
+                    'message' => $message,
+                ];
+            }, $phones);
+
+            $response = Http::withHeaders([
+                'X-API-SECRET' => $this->apiKey,
+            ])->post("{$this->baseUrl}/session/send-bulk", [
+                'session'  => $session,
+                'messages' => $messages,
+            ]);
+
+            if (!$response->successful()) {
+                Log::error("Gagal kirim bulk message. Status: {$response->status()} | Body: " . $response->body());
+                return [
+                    'success' => false,
+                    'body'    => $response->body(),
+                    'status'  => $response->status(),
+                ];
+            }
+
+            return [
+                'success' => true,
+                'body'    => $response->json(),
+                'status'  => $response->status(),
+            ];
+
+        } catch (\Exception $e) {
+            Log::error("Exception kirim bulk message: " . $e->getMessage());
+            return [
+                'success' => false,
+                'body'    => $e->getMessage(),
+                'status'  => 500,
+            ];
+        }
+    }
+
+
     public function logoutSession(string $session)
     {
         return Http::withHeaders([

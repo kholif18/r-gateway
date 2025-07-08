@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('message_histories', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('phone');
             $table->text('message');
             $table->enum('status', ['delivered', 'read', 'pending', 'failed'])->default('pending');

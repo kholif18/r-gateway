@@ -34,4 +34,9 @@ class Setting extends Model
     {
         return static::updateOrCreate(['key' => $key], ['value' => $value]);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

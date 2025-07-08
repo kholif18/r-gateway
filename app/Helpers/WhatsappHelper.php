@@ -44,7 +44,7 @@ class WhatsappHelper
     /**
      * Normalisasi nomor telepon menjadi format internasional (tanpa +)
      */
-    public static function normalizePhoneNumber(string $number, string $countryCode = null): string
+    public static function normalizePhoneNumber(string $number, ?string $countryCode = null): string
     {
         $countryCode = $countryCode ?? Setting::get('country_code', config('app.country_code', '62'));
 

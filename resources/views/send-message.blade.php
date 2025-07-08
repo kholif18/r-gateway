@@ -83,6 +83,11 @@
                         <i class="fas fa-users"></i> Kirim ke Grup
                     </button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="bulk-tab" data-bs-toggle="tab" data-bs-target="#bulk" type="button" role="tab">
+                        <i class="fas fa-users"></i> Kirim ke Banyak Nomor
+                    </button>
+                </li>
             </ul>
             
             <div class="tab-content" id="myTabContent">
@@ -114,8 +119,13 @@
                             <div class="form-section info-section">
                                 <strong>Informasi</strong>
                                 <div class="connection-status">
-                                    <span class="status-indicator status-connected"></span>
-                                    Status koneksi WA: <span class="badge bg-success">Terhubung</span>
+                                    <span class="status-indicator {{ $waConnected ? 'status-connected' : 'status-disconnected' }}"></span>
+                                    Status koneksi WA:
+                                    @if($waConnected)
+                                        <span class="badge bg-success">Terhubung</span>
+                                    @else
+                                        <span class="badge bg-danger">Tidak Terhubung</span>
+                                    @endif
                                 </div>
                                 <ul class="text-sm text-gray-600 mt-2">
                                     <li>Gunakan untuk menguji pengiriman pesan langsung ke WhatsApp.</li>
@@ -160,8 +170,14 @@
                             <div class="form-section info-section">
                                 <strong>Informasi</strong>
                                 <div class="connection-status">
-                                    <span class="status-indicator status-connected"></span>
-                                    Status koneksi WA: <span class="badge bg-success">Terhubung</span>
+                                    <span class="status-indicator {{ $waConnected ? 'status-connected' : 'status-disconnected' }}"></span>
+Status koneksi WA:
+@if($waConnected)
+    <span class="badge bg-success">Terhubung</span>
+@else
+    <span class="badge bg-danger">Tidak Terhubung</span>
+@endif
+
                                 </div>
                                 <ul class="text-sm text-gray-600 mt-2">
                                     <li>Kirim file melalui URL langsung ke WhatsApp.</li>
@@ -214,8 +230,14 @@
                             <div class="form-section info-section">
                                 <strong>Informasi</strong>
                                 <div class="connection-status">
-                                    <span class="status-indicator status-connected"></span>
-                                    Status koneksi WA: <span class="badge bg-success">Terhubung</span>
+                                    <span class="status-indicator {{ $waConnected ? 'status-connected' : 'status-disconnected' }}"></span>
+Status koneksi WA:
+@if($waConnected)
+    <span class="badge bg-success">Terhubung</span>
+@else
+    <span class="badge bg-danger">Tidak Terhubung</span>
+@endif
+
                                 </div>
                                 <ul class="text-sm text-gray-600 mt-2">
                                     <li>Upload file dari perangkat Anda untuk dikirim ke WhatsApp.</li>
@@ -256,14 +278,66 @@
                             <div class="form-section info-section">
                                 <strong>Informasi</strong>
                                 <div class="connection-status">
-                                    <span class="status-indicator status-connected"></span>
-                                    Status koneksi WA: <span class="badge bg-success">Terhubung</span>
+                                    <span class="status-indicator {{ $waConnected ? 'status-connected' : 'status-disconnected' }}"></span>
+Status koneksi WA:
+@if($waConnected)
+    <span class="badge bg-success">Terhubung</span>
+@else
+    <span class="badge bg-danger">Tidak Terhubung</span>
+@endif
+
                                 </div>
                                 <ul class="text-sm text-gray-600 mt-2">
                                     <li>Kirim pesan langsung ke grup WhatsApp.</li>
                                     <li>Sesuaikan dengan nama grup, perhatikan huruf BESAR, kecil, angka dan simbol.</li>
                                     <li>Pastikan bot/admin memiliki akses ke grup tersebut.</li>
                                     <li>Pesan akan dikirim sebagai pengguna yang sedang login.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tab Kirim ke Banyak Nomor -->
+                <div class="tab-pane fade" id="bulk" role="tabpanel">
+                    <form method="POST" action="{{ route('message.send') }}">
+                        @csrf
+                        <input type="hidden" name="type" value="bulk">
+                        <div class="form-container">
+                            <div class="form-section">
+                                <div class="form-group">
+                                    <label for="bulk-numbers">WhatsApp Numbers</label>
+                                    <textarea id="bulk-numbers" name="phones" class="form-control" placeholder="Masukkan nomor, pisahkan dengan koma atau baris baru" rows="5" required></textarea>
+                                    <small class="form-text text-muted">Contoh: 081234567890, 082345678901, ...</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bulk-message">Message Content</label>
+                                    <textarea id="bulk-message" name="message" class="form-control" placeholder="Type your message here..." rows="5"></textarea>
+                                </div>
+
+                                <div class="btn-group">
+                                    <button type="submit" class="btn" id="send-bulk-button">
+                                        <i class="fas fa-paper-plane"></i> Send Bulk Message
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-section info-section">
+                                <strong>Informasi</strong>
+                                <div class="connection-status">
+                                    <span class="status-indicator {{ $waConnected ? 'status-connected' : 'status-disconnected' }}"></span>
+                                    Status koneksi WA:
+                                    @if($waConnected)
+                                        <span class="badge bg-success">Terhubung</span>
+                                    @else
+                                        <span class="badge bg-danger">Tidak Terhubung</span>
+                                    @endif
+                                </div>
+                                <ul class="text-sm text-gray-600 mt-2">
+                                    <li>Kirim pesan yang sama ke banyak nomor sekaligus.</li>
+                                    <li>Pisahkan nomor dengan koma atau baris baru.</li>
+                                    <li>Nomor bisa diawali <code>0</code> atau <code>62</code>, sistem akan menyesuaikan.</li>
+                                    <li>Pastikan nomor aktif dan terhubung dengan WhatsApp.</li>
+                                    <li>Pesan akan dikirim dari akun WhatsApp Anda yang sedang login.</li>
                                 </ul>
                             </div>
                         </div>
@@ -370,30 +444,6 @@
                 default: return 'fas fa-file fa-3x text-secondary';
             }
         }
-
-        
-        // Simulate form submission
-        // document.querySelectorAll('form').forEach(form => {
-        //     form.addEventListener('submit', function(e) {
-        //         e.preventDefault();
-                
-        //         // Get active tab
-        //         const activeTab = document.querySelector('.nav-link.active').id;
-        //         let message = '';
-                
-        //         if (activeTab === 'text-tab') {
-        //             message = 'Pesan teks berhasil dikirim!';
-        //         } else if (activeTab === 'file-url-tab') {
-        //             message = 'File dari URL berhasil dikirim!';
-        //         } else if (activeTab === 'file-upload-tab') {
-        //             message = 'File berhasil diupload dan dikirim!';
-        //         } else if (activeTab === 'group-tab') {
-        //             message = 'Pesan berhasil dikirim ke grup!';
-        //         }
-                
-        //         alert(message);
-        //     });
-        // });
 
         function showToast(title, message, type = 'success') {
             const toastEl = document.getElementById('feedbackToast');

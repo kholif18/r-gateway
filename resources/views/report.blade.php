@@ -29,37 +29,9 @@
                     </tbody>
                 </table>
             </div>
-            
-            <div class="pagination">
-                {{-- Previous --}}
-                @if ($reports->onFirstPage())
-                    <button class="page-btn" disabled><i class="fas fa-chevron-left"></i></button>
-                @else
-                    <a href="{{ $reports->previousPageUrl() }}" class="page-btn"><i class="fas fa-chevron-left"></i></a>
-                @endif
-
-                {{-- Page numbers --}}
-                @foreach ($reports->getUrlRange(1, $reports->lastPage()) as $page => $url)
-                    @if ($page == $reports->currentPage())
-                        <span class="page-btn active">{{ $page }}</span>
-                    @else
-                        <a href="{{ $url }}" class="page-btn">{{ $page }}</a>
-                    @endif
-                @endforeach
-
-                {{-- Next --}}
-                @if ($reports->hasMorePages())
-                    <a href="{{ $reports->nextPageUrl() }}" class="page-btn"><i class="fas fa-chevron-right"></i></a>
-                @else
-                    <button class="page-btn" disabled><i class="fas fa-chevron-right"></i></button>
-                @endif
-
-                {{-- Info --}}
-                <span class="page-info">
-                    Page {{ $reports->currentPage() }} of {{ $reports->lastPage() }}
-                </span>
-            </div>
-
+        </div>
+        <div class="pagination overflow-x-auto whitespace-nowrap mb-4">
+            <x-pagination :paginator="$reports" />
         </div>
     </div>
 

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('message_logs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('client_name'); // Nama aplikasi pihak ketiga
             $table->string('session_name'); // Nama session WhatsApp
             $table->string('phone'); // Nomor tujuan

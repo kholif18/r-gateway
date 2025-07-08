@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MessageLog;
 use Illuminate\Http\Request;
 use App\Helpers\WhatsappHelper;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MessageLogController extends Controller
@@ -84,14 +85,21 @@ class MessageLogController extends Controller
      */
     protected function applyFilters($query, Request $request)
     {
+        $query->where('user_id', Auth::id()); // ⬅️ Batasi data berdasarkan user login
+
         if ($request->filled('client_name') && $request->client_name !== 'all') {
             $query->where('client_name', $request->client_name);
         }
 
         if ($request->filled('phone') && $request->phone !== 'all') {
-            $normalized = WhatsappHelper::normalizePhoneNumber($request->phone); // ✅ Gunakan helper
+            $input = $request->phone;
+            $normalized = is_numeric(str_replace(['+', ' '], '', $input))
+                ? WhatsappHelper::normalizePhoneNumber($input)
+                : $input;
+
             $query->where('phone', 'like', '%' . $normalized . '%');
         }
+
 
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
@@ -109,4 +117,5 @@ class MessageLogController extends Controller
 
         return $query;
     }
+
 }

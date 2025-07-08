@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('api_clients', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('client_name')->unique();
             $table->string('session_name')->nullable();
             $table->string('api_token')->unique();

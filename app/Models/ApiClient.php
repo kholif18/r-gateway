@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ApiClient extends Model
 {
     protected $fillable = [
+        'user_id',
         'client_name',
         'session_name',
         'api_token',
@@ -24,6 +25,6 @@ class ApiClient extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class);
     }
 }
