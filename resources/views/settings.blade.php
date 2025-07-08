@@ -246,42 +246,51 @@
         // Handle Install Update via delegation
         document.addEventListener('click', function (e) {
             if (e.target && e.target.id === 'installUpdateBtn') {
-                if (!confirm('Apakah Anda yakin ingin menginstal pembaruan ini sekarang?')) return;
+                Swal.fire({
+                    title: 'Konfirmasi Instalasi',
+                    text: 'Apakah Anda yakin ingin menginstal pembaruan ini sekarang?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, instal sekarang',
+                    cancelButtonText: 'Batal',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const installBtn = e.target;
+                        const installSpinner = document.getElementById('installSpinner');
+                        const installStatus = document.getElementById('installStatus');
 
-                const installBtn = e.target;
-                const installSpinner = document.getElementById('installSpinner');
-                const installStatus = document.getElementById('installStatus');
+                        installBtn.disabled = true;
+                        installSpinner.classList.remove('d-none');
+                        installStatus.classList.remove('d-none', 'text-success', 'text-danger');
+                        installStatus.textContent = 'Sedang menginstal pembaruan, mohon tunggu...';
 
-                installBtn.disabled = true;
-                installSpinner.classList.remove('d-none');
-                installStatus.classList.remove('d-none', 'text-success', 'text-danger');
-                installStatus.textContent = 'Sedang menginstal pembaruan, mohon tunggu...';
+                        fetch('{{ route('update.install') }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        })
+                        .then(response => handleFetchResponse(response))
+                        .then(data => {
+                            installSpinner.classList.add('d-none');
+                            installStatus.textContent = data.message;
 
-                fetch('{{ route('update.install') }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            if (data.success) {
+                                installStatus.classList.add('text-success');
+                                setTimeout(() => location.reload(), 3000);
+                            } else {
+                                installStatus.classList.add('text-danger');
+                                installBtn.disabled = false;
+                            }
+                        })
+                        .catch(error => {
+                            installSpinner.classList.add('d-none');
+                            installStatus.classList.add('text-danger');
+                            installStatus.textContent = 'Terjadi kesalahan saat instalasi.';
+                            installBtn.disabled = false;
+                            console.error('Install error:', error);
+                        });
                     }
-                })
-                .then(response => handleFetchResponse(response))
-                .then(data => {
-                    installSpinner.classList.add('d-none');
-                    installStatus.textContent = data.message;
-
-                    if (data.success) {
-                        installStatus.classList.add('text-success');
-                        setTimeout(() => location.reload(), 3000);
-                    } else {
-                        installStatus.classList.add('text-danger');
-                        installBtn.disabled = false;
-                    }
-                })
-                .catch(error => {
-                    installSpinner.classList.add('d-none');
-                    installStatus.classList.add('text-danger');
-                    installStatus.textContent = 'Terjadi kesalahan saat instalasi.';
-                    installBtn.disabled = false;
-                    console.error('Install error:', error);
                 });
             }
         });
@@ -300,7 +309,10 @@
 
         function handleFetchResponse(response) {
             if (!response.ok) {
-                throw new Error(`HTTP error ${response.status}`);
+                return response.text().then(text => {
+                    console.error('Response body:', text);
+                    throw new Error(`HTTP error ${response.status}`);
+                });
             }
             return response.json();
         }
