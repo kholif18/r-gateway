@@ -17,12 +17,26 @@ class UpdateInstaller
 
     public function __construct()
     {
-        $this->updateUrl = Setting::get('update_url');
         $this->tempZip = storage_path('app/update.zip');
         $this->tmpExtractPath = storage_path('app/tmp');
         $this->backupPath = storage_path('app/backup');
         $this->timestamp = now()->format('Ymd_His');
         $this->backupZip = "{$this->backupPath}/r-gateway-backup-{$this->timestamp}.zip";
+        $this->updateUrl = $this->fetchUpdateUrl();
+    }
+
+    protected function fetchUpdateUrl(): string
+    {
+        try {
+            $response = Http::get('https://raw.githubusercontent.com/kholif18/r-gateway/main/version.json');
+            if ($response->ok()) {
+                return $response->json('url') ?? '';
+            }
+        } catch (\Exception $e) {
+            // Log error jika perlu
+        }
+
+        return '';
     }
 
     public function install(): array
