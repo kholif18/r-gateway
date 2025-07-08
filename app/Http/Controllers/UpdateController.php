@@ -12,9 +12,8 @@ class UpdateController extends Controller
     public function check()
     {
         try {
-            $currentVersion = Setting::get('app_version', '1.0.0');
+            $currentVersion = Setting::getGlobal('app_version', '1.0.0');
 
-            $checker = new UpdateChecker();
             $info = Cache::remember('update_check', 60, function () {
                 return (new UpdateChecker())->check();
             });
