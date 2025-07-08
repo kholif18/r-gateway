@@ -23,7 +23,11 @@ class UpdateChecker
         if ($response->ok()) {
             $latest = $response->json();
 
-            $isOutdated = version_compare($this->currentVersion, $latest['version'], '<');
+            $isOutdated = version_compare(
+                ltrim($this->currentVersion, 'v'),
+                ltrim($latest['version'], 'v'),
+                '<'
+            );
 
             return [
                 'is_outdated'    => $isOutdated,
