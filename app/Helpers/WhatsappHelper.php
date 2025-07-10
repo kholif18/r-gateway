@@ -14,7 +14,7 @@ class WhatsappHelper
      */
     public static function checkGatewayStatus(string $session): array
     {
-        $backendUrl = env('WA_BACKEND_URL');
+        $backendUrl = config('services.whatsapp.url');
 
         if (!$backendUrl) {
             Log::warning('WA_BACKEND_URL tidak disetel di .env');
@@ -27,7 +27,7 @@ class WhatsappHelper
         try {
             $url = "{$backendUrl}/session/status?session={$session}";
             $response = Http::withHeaders([
-                'X-API-SECRET' => env('API_SECRET'),
+                'X-API-SECRET' => config('services.whatsapp.key'),
             ])->timeout(5)->get($url); // ⏱️ Tambahkan timeout
 
             if ($response->ok()) {
