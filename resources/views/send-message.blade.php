@@ -62,6 +62,13 @@
             </div>
         </div>
         <div class="card-body">
+            @if (!$waConnected)
+                <div class="alert alert-warning">
+                    ⚠️ WhatsApp Gateway tidak terhubung atau konfigurasi belum lengkap.
+                </div>
+            @endif
+
+
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="text-tab" data-bs-toggle="tab" data-bs-target="#text" type="button" role="tab">

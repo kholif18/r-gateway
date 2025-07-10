@@ -429,6 +429,7 @@ body {
 }
 
 .status-card .card-value {
+    transition: color 0.3s ease, opacity 0.3s ease;
     font-size: 32px;
     font-weight: 700;
     margin-bottom: 10px;

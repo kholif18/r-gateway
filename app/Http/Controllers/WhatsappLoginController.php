@@ -10,11 +10,9 @@ use Illuminate\Support\Facades\Cache;
 
 class WhatsappLoginController extends Controller
 {
-    protected WhatsAppService $whatsapp;
-
-    public function __construct(WhatsAppService $whatsapp)
+    protected function whatsapp(): WhatsAppService
     {
-        $this->whatsapp = $whatsapp;
+        return app(WhatsAppService::class);
     }
 
     protected function getSession(): ?string
@@ -39,7 +37,7 @@ class WhatsappLoginController extends Controller
         }
 
         // ✅ Cek status session
-        $status = $this->whatsapp->checkSessionStatus($session);
+        $status = $this->whatsapp()->checkSessionStatus($session);
 
         if ($status && in_array(strtolower($status['status']), ['connected', 'qr'])) {
             return response()->json([
@@ -49,7 +47,7 @@ class WhatsappLoginController extends Controller
         }
 
         // ✅ Mulai sesi baru
-        $response = $this->whatsapp->startSession($session);
+        $response = $this->whatsapp()->startSession($session);
         return response()->json($response->json(), $response->status());
     }
 
@@ -61,7 +59,7 @@ class WhatsappLoginController extends Controller
             return response()->json(['error' => 'Unauthorized or username missing'], 403);
         }
 
-        $this->whatsapp->logoutSession($session);
+        $this->whatsapp()->logoutSession($session);
 
         return redirect()->route('whatsapp.login')->with('status', 'Berhasil logout');
     }

@@ -12,29 +12,48 @@ use App\Helpers\WhatsappHelper;
 
 class MessageController extends Controller
 {
-    protected $wa;
+    protected $wa = null;
 
     public function __construct()
     {
-        $this->wa = new WhatsAppService();
+        try {
+            $this->wa = new WhatsAppService();
+        } catch (\RuntimeException $e) {
+            // Tidak set service jika env tidak lengkap
+            $this->wa = null;
+            // Bisa log error juga jika mau
+            Log::warning("WhatsAppService init failed: " . $e->getMessage());
+        }
     }
 
     public function index()
     {
         $session = Auth::user()->username;
-        $statusData = WhatsappHelper::checkGatewayStatus($session);
+
+        $statusData = [
+            'connected' => false,
+            'status' => 'disconnected',
+        ];
+
+        if ($this->wa) {
+            $statusData = WhatsappHelper::checkGatewayStatus($session);
+        }
 
         return view('send-message', [
-            'waStatus' => $statusData && $statusData['status'] === 'connected' ? 'Terhubung' : 'Tidak Terhubung',
-            'waConnected' => $statusData && $statusData['status'] === 'connected',
+            'waStatus' => $statusData['status'] === 'connected' ? 'Terhubung' : 'Tidak Terhubung',
+            'waConnected' => $statusData['status'] === 'connected',
         ]);
     }
+
 
     public function send(Request $request)
     {
         $session = Auth::user()->username;
         $client  = Auth::user()->name ?? 'Test Gateway';
 
+        if (!$this->wa) {
+            return back()->with('error', 'Konfigurasi WhatsApp belum lengkap. Periksa file .env Anda.');
+        }
         $type = $request->input('type');
 
         $number = '-';

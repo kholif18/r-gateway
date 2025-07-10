@@ -2,20 +2,33 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
+use RuntimeException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class WhatsAppService
 {
-    protected string $baseUrl;
-    protected string $apiKey;
-    protected string $socketUrl;
+    protected ?string $baseUrl;
+    protected ?string $apiKey;
+    protected ?string $socketUrl;
 
     public function __construct()
     {
         $this->baseUrl   = config('services.whatsapp.url');         // dari WA_BACKEND_URL
         $this->apiKey    = config('services.whatsapp.key');         // dari API_SECRET
         $this->socketUrl = config('services.whatsapp.socket_url');  // dari WHATSAPP_SOCKET_URL
+
+        if (!$this->baseUrl) {
+            throw new RuntimeException("WA_BACKEND_URL belum disetel di file .env");
+        }
+
+        if (!$this->apiKey) {
+            throw new RuntimeException("API_SECRET belum disetel di file .env");
+        }
+
+        if (!$this->socketUrl) {
+            throw new RuntimeException("WHATSAPP_SOCKET_URL belum disetel di file .env");
+        }
     }
 
     public function startSession(string $session)

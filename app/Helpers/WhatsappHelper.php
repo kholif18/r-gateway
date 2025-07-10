@@ -14,25 +14,38 @@ class WhatsappHelper
      */
     public static function checkGatewayStatus(string $session): array
     {
+        $backendUrl = env('WA_BACKEND_URL');
+
+        if (!$backendUrl) {
+            Log::warning('WA_BACKEND_URL tidak disetel di .env');
+            return [
+                'connected' => false,
+                'status' => 'unconfigured',
+            ];
+        }
+
         try {
-            $url = env('WA_BACKEND_URL') . "/session/status?session={$session}";
+            $url = "{$backendUrl}/session/status?session={$session}";
             $response = Http::withHeaders([
                 'X-API-SECRET' => env('API_SECRET'),
-            ])->get($url);
+            ])->timeout(5)->get($url); // ⏱️ Tambahkan timeout
 
             if ($response->ok()) {
-                $status = strtolower($response->json('status', 'unknown'));
+                $json = $response->json();
+                $status = strtolower($json['status'] ?? 'unknown');
+
+                Log::info("Status session {$session}: {$status}");
 
                 return [
                     'connected' => $status === 'connected',
                     'status' => $status,
-                    'raw' => $response->json(),
+                    'raw' => $json,
                 ];
             } else {
-                Log::warning("Status check failed with code {$response->status()}: " . $response->body());
+                Log::warning("Status check failed ({$response->status()}): " . $response->body());
             }
         } catch (\Exception $e) {
-            Log::error('Gagal cek status gateway: ' . $e->getMessage());
+            Log::error("Gagal cek status gateway ({$session}): " . $e->getMessage());
         }
 
         return [
@@ -40,6 +53,7 @@ class WhatsappHelper
             'status' => 'disconnected',
         ];
     }
+
 
     /**
      * Normalisasi nomor telepon menjadi format internasional (tanpa +)

@@ -159,7 +159,7 @@
             }
 
             // Fetch saat pertama kali halaman dimuat
-            fetchGatewayStatus();
+            setTimeout(fetchGatewayStatus, 100);
 
             // Set interval refresh setiap 30 detik
             setInterval(fetchGatewayStatus, 30000);

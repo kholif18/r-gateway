@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\MessageLog;
 use App\Helpers\WhatsappHelper;
-use Illuminate\Support\Facades\Auth;
 use App\Services\UpdateChecker;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
@@ -81,11 +82,14 @@ class DashboardController extends Controller
         ));
     }
 
-
     public function status()
     {
         $session = Auth::user()->username;
-        $status = WhatsappHelper::checkGatewayStatus($session);
+        $cacheKey = "wa_status:{$session}";
+
+        $status = Cache::remember($cacheKey, 30, function () use ($session) {
+            return WhatsappHelper::checkGatewayStatus($session);
+        });
 
         return response()->json($status);
     }
