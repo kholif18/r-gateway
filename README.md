@@ -77,17 +77,18 @@ Pastikan server WhatsApp (wa-backend) sudah berjalan di alamat dan port yang ben
 ```env
 WA_BACKEND_URL=http://localhost:3000
 WHATSAPP_SOCKET_URL=http://localhost:3000
-
+```
 ---
 
 ## 🧪 API Pengiriman Pesan
 
 ### Endpoint
-```
+
 POST /api/send
-```
+
 
 ### Header
+
 ```http
 Authorization: Bearer {API_TOKEN}
 Content-Type: application/json
