@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Helpers\WhatsappHelper;
+use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use App\Services\WhatsAppService;
 
 class WhatsappLoginController extends Controller
 {
@@ -24,7 +25,7 @@ class WhatsappLoginController extends Controller
     public function index()
     {
         $session = $this->getSession();
-        $status = Cache::get("whatsapp_status_{$session}", 'DISCONNECTED');
+        $status = WhatsappHelper::checkGatewayStatus($session);
 
         return view('wa-login', compact('status'));
     }
@@ -50,18 +51,6 @@ class WhatsappLoginController extends Controller
         // ✅ Mulai sesi baru
         $response = $this->whatsapp->startSession($session);
         return response()->json($response->json(), $response->status());
-    }
-
-    public function status()
-    {
-        $session = $this->getSession();
-
-        if (!$session) {
-            return response()->json(['error' => 'Unauthorized or username missing'], 403);
-        }
-
-        $status = $this->whatsapp->checkSessionStatus($session);
-        return response()->json($status ?? ['status' => 'disconnected']);
     }
 
     public function logout()

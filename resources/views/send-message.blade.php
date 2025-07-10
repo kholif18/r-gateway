@@ -153,8 +153,8 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="file-url">File URL</label>
-                                    <input type="url" id="file-url" name="file_url" class="form-control" placeholder="https://example.com/file.jpg" required>
+                                    <label for="file_url">File URL</label>
+                                    <input type="url" id="file_url" name="file_url" class="form-control" placeholder="https://example.com/file.jpg" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="file-url-caption">File Caption</label>
@@ -171,13 +171,12 @@
                                 <strong>Informasi</strong>
                                 <div class="connection-status">
                                     <span class="status-indicator {{ $waConnected ? 'status-connected' : 'status-disconnected' }}"></span>
-Status koneksi WA:
-@if($waConnected)
-    <span class="badge bg-success">Terhubung</span>
-@else
-    <span class="badge bg-danger">Tidak Terhubung</span>
-@endif
-
+                                    Status koneksi WA:
+                                    @if($waConnected)
+                                        <span class="badge bg-success">Terhubung</span>
+                                    @else
+                                        <span class="badge bg-danger">Tidak Terhubung</span>
+                                    @endif
                                 </div>
                                 <ul class="text-sm text-gray-600 mt-2">
                                     <li>Kirim file melalui URL langsung ke WhatsApp.</li>

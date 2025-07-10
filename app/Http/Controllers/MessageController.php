@@ -25,8 +25,8 @@ class MessageController extends Controller
         $statusData = WhatsappHelper::checkGatewayStatus($session);
 
         return view('send-message', [
-            'waStatus' => $statusData['connected'] ? 'Terhubung' : 'Tidak Terhubung',
-            'waConnected' => $statusData['connected'],
+            'waStatus' => $statusData && $statusData['status'] === 'connected' ? 'Terhubung' : 'Tidak Terhubung',
+            'waConnected' => $statusData && $statusData['status'] === 'connected',
         ]);
     }
 
