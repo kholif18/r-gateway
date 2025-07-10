@@ -14,7 +14,7 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Client Name</th>
+                        <th>App Name</th>
                         <th>API Token</th>
                         <th>Status</th>
                         <th>Create</th>
