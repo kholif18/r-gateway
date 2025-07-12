@@ -1,9 +1,16 @@
 {
-  "version": "1.1.5",
+  "version": "1.1.0",
   "changelog": [
     "- fix cek status",
-    "- validasi service"
+    "- validasi service",
+    "- Fitur kirim ke grup",
+    "- Kirim media lewat upload",
+    "- kirim masal",
+    "- kirim fule url",
+    "- Perbaikan autentikasi user",
+    "- fix check update",
+    "- fix installation update"
   ],
-  "url": "https://github.com/kholif18/r-gateway/archive/refs/tags/1.1.5.zip",
-  "release_page": "https://github.com/kholif18/r-gateway/releases/tag/1.1.5"
+  "url": "https://github.com/kholif18/r-gateway/archive/refs/tags/1.1.0.zip",
+  "release_page": "https://github.com/kholif18/r-gateway/releases/tag/1.1.0"
 }
